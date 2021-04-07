@@ -1,3 +1,3 @@
 
-# PneuPanel Plugin
-The plugin for bdsx
+# BDSX Web Panel Plugin
+A simple web panel for BDSX

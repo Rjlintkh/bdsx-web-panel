@@ -1,22 +1,21 @@
 import { RakNetInstance } from "bdsx/bds/raknetinstance";
-import { RawTypeId } from "bdsx";
-import { SYMOPT_UNDNAME } from "bdsx/common";
 import { NativePointer, pdb, VoidPointer } from "bdsx/core";
 import { ProcHacker } from "bdsx/prochacker";
 
 import * as path from "path";
 import { CxxStringWrapper } from "bdsx/pointer";
+import { UNDNAME_NAME_ONLY } from "../../bdsx/dbghelp";
+import { int32_t } from "../../bdsx/nativetype";
 
-pdb.setOptions(SYMOPT_UNDNAME);
 const hacker = ProcHacker.load(path.join(__dirname, "pdbcache.ini"), [
     "RakNetInstance::getPort",
-]);
+], UNDNAME_NAME_ONLY);
 pdb.setOptions(0);
 pdb.close();
 
 export const api = {
     RakNetInstance: {
-        getPort: hacker.js("RakNetInstance::getPort", RawTypeId.Int32, null, RakNetInstance),
+        getPort: hacker.js("RakNetInstance::getPort", int32_t, null, RakNetInstance),
     }
 }
 

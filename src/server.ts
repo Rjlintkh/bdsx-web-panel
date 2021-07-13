@@ -3,11 +3,12 @@ import fs = require("fs");
 import os = require("os");
 import path = require("path");
 import { bedrockServer } from "bdsx/launcher";
-import { serverInstance } from "bdsx";
 import { loadedPlugins } from "bdsx/plugins";
 import { api } from "./api";
 import { serverProperties, tmp } from "./data";
 import { TextPacket } from "bdsx/bds/packets";
+import { serverInstance } from "../../bdsx/bds/server";
+import { events } from "../../bdsx/event";
 
 const app = require("express")();
 const http = require("http").createServer(app);
@@ -94,7 +95,7 @@ http.on("connection", (socket: any) => {
     socket.setTimeout(5000);
 });
 
-bedrockServer.open.on(() => {
+events.serverOpen.on(() => {
     tmp.status = true;
     io.emit("status", tmp.status);
     tmp.info.server.name = serverInstance.getMotd();
@@ -131,7 +132,7 @@ bedrockServer.open.on(() => {
     io.emit("info.server", tmp.info.server);
 });
 
-bedrockServer.close.on(() => {
+events.serverClose.on(() => {
     tmp.status = false;
     io.emit("status", tmp.status);
     setTimeout(() => {

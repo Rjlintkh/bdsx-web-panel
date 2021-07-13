@@ -1,6 +1,6 @@
-import { bedrockServer } from "bdsx";
+import { events } from "bdsx/event";
 import "./src/server";
 
-bedrockServer.open.on(() => {
+events.serverOpen.on(() => {
     import("./src/events");
 });

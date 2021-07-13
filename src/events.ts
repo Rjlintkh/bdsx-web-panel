@@ -1,6 +1,8 @@
 
-import { MinecraftPacketIds, nethook, NetworkIdentifier, serverInstance } from "bdsx";
 import { events } from "bdsx/event";
+import { MinecraftPacketIds } from "../../bdsx/bds/packetids";
+import { serverInstance } from "../../bdsx/bds/server";
+import { CANCEL } from "../../bdsx/common";
 import { tmp } from "./data";
 import { io } from "./server";
 
@@ -14,9 +16,11 @@ events.queryRegenerate.on(ev => {
     io.emit("info.server", tmp.info.server);
 });
 
-nethook.after(MinecraftPacketIds.Login).on((pk, ni) => {
-    let extraData = pk.connreq.cert.json.value()["extraData"];
-    let clientData = pk.connreq.something.json.value();
+events.packetAfter(MinecraftPacketIds.Login).on((pk, ni) => {
+    let connreq = pk.connreq;
+    if (!connreq) return;
+    let extraData = connreq.cert.json.value()["extraData"];
+    let clientData = connreq.something.json.value();
     let player = {
         event: "join",
         name: extraData["displayName"],
@@ -36,7 +40,7 @@ nethook.after(MinecraftPacketIds.Login).on((pk, ni) => {
     io.emit("player", player);
 });
 
-nethook.before(MinecraftPacketIds.Text).on((pk, ni) => {
+events.packetBefore(MinecraftPacketIds.Text).on((pk, ni) => {
     let data = {
         name: pk.name,
         message: pk.message,
@@ -46,7 +50,7 @@ nethook.before(MinecraftPacketIds.Text).on((pk, ni) => {
     io.emit("chat", data);
 });
 
-NetworkIdentifier.close.on(ni => {
+events.networkDisconnected.on(ni => {
     io.emit("player", {
         event: "leave",
         uuid: tmp.players.get(ni).uuid

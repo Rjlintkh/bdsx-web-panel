@@ -76,12 +76,12 @@
             <div class="col-lg col-md-6 col-sm-6 position-absolute mh-20" style="bottom: 0;">
               <div class="card card-small card-post mb-3">
                 <div class="card-body">
-                  <h5 class="card-title text-truncate">
+                  <h6 class="card-title text-truncate">
                     <i class="material-icons text-success" v-if="data.status">check_circle_outline</i>
                     <i class="material-icons text-danger" v-if="!data.status">remove_circle_outline</i>
                     <span>{{ data.server.info.name }}</span>
-                  </h5>
-                  <p class="card-text text-muted text-truncate">{{ data.server.announcement.name }} - v{{ data.server.version }}</p>
+                  </h6>
+                  <i class="card-text text-muted text-truncate">{{ data.server.announcement.name }} - v{{ data.server.version }}</i>
                   <p class="card-text text-muted text-truncate">{{ data.server.announcement.level }} - ({{ data.server.announcement.players.current }}/{{ data.server.announcement.players.max }})</p>
                 </div>
                 <div class="card-footer border-top d-flex">
@@ -354,7 +354,7 @@
                     <h6 class="m-0">Installed</h6>
                   </div>
                   <div class="card-body p-0">
-                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
+                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
                       <li class="list-group-item d-flex px-3" v-for="(item) in data.server.plugins">
                         <div>
                           <div class="text-muted">
@@ -379,6 +379,8 @@
                       </li>
                     </ul>
                   </div>
+                  <div class="card-footer border-top">
+                  </div>
                 </div>
               </div>
               <div class="col-lg-6 col-md-12 col-sm-12 mb-4">
@@ -388,7 +390,7 @@
                     <h6 class="m-0">Available</h6>
                   </div>
                   <div class="card-body p-0">
-                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
+                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
                       <li class="list-group-item d-flex px-3" v-for="(item) in data.server.onlinePlugins">
                         <div>
                           <div class="text-muted">
@@ -408,6 +410,8 @@
                         </div>
                       </li>
                     </ul>
+                  </div>
+                  <div class="card-footer border-top">
                   </div>
                 </div>
               </div>

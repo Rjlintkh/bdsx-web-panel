@@ -1,4 +1,5 @@
 
 /node_modules
 *.js
-!src/app.js
+!src/gui/app.js
+!src/gui/scripts/*.js

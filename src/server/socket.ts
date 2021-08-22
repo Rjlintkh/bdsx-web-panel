@@ -1,12 +1,22 @@
 import { TextPacket } from "bdsx/bds/packets";
 import { events } from "bdsx/event";
 import { bedrockServer } from "bdsx/launcher";
+import { loadedPlugins } from "bdsx/plugins";
 import { execSync } from "child_process";
 import { Utils } from "../utils";
 import { serverData } from "./data";
 import { panel, SocketEvents } from "./server";
 
 panel.io.on("connection", (socket: any) => {
+    Utils.fetchAllPlugins().then(plugins => {
+        if (plugins !== null) {
+            for (const plugin of plugins) {
+                if (!loadedPlugins.includes(plugin.package.name)) {
+                    serverData.server.onlinePlugins.push(plugin);
+                }
+            }
+        }
+    });
     socket.emit(SocketEvents.SyncServerData, {
         path: [],
         value: serverData,

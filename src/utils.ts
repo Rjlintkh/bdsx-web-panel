@@ -1,10 +1,12 @@
 import https = require("https");
 import os = require("os");
+import Jimp = require("jimp");
 import { NetworkIdentifier } from "bdsx/bds/networkidentifier";
 import { Packet } from "bdsx/bds/packet";
 
 export namespace Utils {
     export const players = new Map<string, NetworkIdentifier>();
+    const skins = new Map<string, NetworkIdentifier>();
 
     export function parseProperties(properties: string): { [key: string]: string } {
         let retval: {[key: string]: string} = {};
@@ -92,5 +94,42 @@ export namespace Utils {
             return "up to date";
         }
         return latest;
+    }
+
+    export async function readSkinBuffer(buffer: Buffer, width: number, height: number, uv?: [number, number], size: [number, number] = [width, height]): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            new Jimp(width, height, (err, image) => {
+                if (err) {
+                    console.error(err);
+                    reject(err);
+                }
+                let offset = 0;
+                const colors = new Array<number>();
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const rgba = Jimp.rgbaToInt(
+                            buffer.readUInt8(offset),
+                            buffer.readUInt8(offset + 1),
+                            buffer.readUInt8(offset + 2),
+                            buffer.readUInt8(offset + 3),
+                            () => {}
+                        );
+                        colors.push(rgba);
+                        offset += 4;
+                        image.setPixelColor(rgba, x, y);
+                    }
+                }
+                if (uv) {
+                    image.crop(uv[0], uv[1], size[0], size[1]);
+                }
+                image.getBase64(Jimp.MIME_PNG, (err, base64Image) => {
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    }
+                    resolve(base64Image);
+                });
+            });
+        });
     }
 }

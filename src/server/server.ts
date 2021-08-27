@@ -4,21 +4,30 @@ import { serverProperties } from "bdsx/serverproperties";
 import { serverData } from "./data";
 
 export enum SocketEvents {
+    // Data
     SyncServerData = "SyncServerData",
     UpdateResourceUsage = "UpdateResourceUsage",
 
+    // GUI
     Toast = "Toast",
 
+    // Input
     InputChat = "InputChat",
     InputCommand = "InputCommand",
 
+    // Server Control
     StopServer = "StopServer",
     RestartServer = "RestartServer",
 
+    // Plugins
     CheckForPluginUpdates = "CheckForPluginUpdates",
     InstallPlugin = "InstallPlugin",
     RemovePlugin = "RemovePlugin",
 
+    // Players
+    StartRequestPlayerInfo = "StartRequestPlayerInfo",
+    StopRequestPlayerInfo = "StopRequestPlayerInfo",
+    UpdateRequestedPlayerInventory = "UpdateRequestedPlayerInventory",
     KickPlayer = "KickPlayer",
 }
 
@@ -68,6 +77,9 @@ class ServerPanel {
                 this.sockets[socketId].destroy();
             }
         }, 3000).unref();
+    }
+    toast(message: string) {
+        this.io.emit(SocketEvents.Toast, message);
     }
 }
 

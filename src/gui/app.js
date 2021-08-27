@@ -63,8 +63,6 @@ const app = new Vue({
     methods: {
         stopServer: () => socket.emit("StopServer"),
         restartServer: () => socket.emit("RestartServer"),
-        kill: () => socket.emit("control", "kill"),
-        changesetting: ev => socket.emit("changesetting", { setting: ev.target.name, value: ev.target.value }),
         command: ev => {
             socket.emit("InputCommand", ev.target.value);
             ev.target.value = "";
@@ -79,8 +77,23 @@ const app = new Vue({
         installPlugin: (plugin, version) => {
             socket.emit("InstallPlugin", plugin, version);
         },
-        removePlugin: (plugin) => {
+        removePlugin: plugin => {
             socket.emit("RemovePlugin", plugin);
+        },
+        selectPlayer: player => {
+            if (app.data.selectedPlayer?.uuid === player.uuid) {
+                app.data.selectedPlayer = undefined;
+                socket.emit("StopRequestPlayerInfo", player.uuid);
+            } else {
+                app.data.selectedPlayer = player;
+                socket.emit("StartRequestPlayerInfo", player.uuid);
+                // setTimeout(() => {
+                //     new GuiRender(player, document.getElementById("inventory-render"));
+                // }, 1000);
+            }
+        },
+        kickPlayer: (uuid, reason = null) => {
+            socket.emit("KickPlayer", uuid, reason);
         },
     }
 });
@@ -140,13 +153,32 @@ const ramChart = new Chart(
         }
     }
 );
-socket.on("UpdateResourceUsage", data => {
+
+socket.on("UpdateResourceUsage", () => {
     ramChart.data.labels = app.data.process.usage.ram.map(e => new Date(e.time).toUTCString().slice(-12, -7));
     ramChart.data.datasets[0].data = app.data.process.usage.ram.map(e => e.percent);
     ramChart.data.datasets[1].data = app.data.process.usage.cpu.map(e => e.percent);
     ramChart.update();
 });
-
-socket.on("Toast", data => {
-    console.log("toast", data);
+// socket.on("UpdateRequestedPlayerInventory", () => {
+//     if (app.data.selectedPlayer) {
+//         document.getElementById("inventory-render").innerHTML = "";
+//         const guiRender = new GuiRender(app.data.selectedPlayer.gameInfo.inv.options, document.getElementById("inventory-render"));
+//         guiRender.render(app.data.selectedPlayer.gameInfo.inv.content);
+//     }
+// });
+socket.on("StopRequestPlayerInfo", uuid => {
+    if (app.data.selectedPlayer?.uuid === uuid) {
+        app.data.selectedPlayer = undefined;
+    }
 });
+
+socket.on("Toast", message => {
+    console.info("toast", message);
+});
+
+window.addEventListener("beforeunload", () => {
+    if (app.data.selectedPlayer?.uuid) {
+        socket.emit("StopRequestPlayerInfo", player.uuid);
+    }
+ }, false);

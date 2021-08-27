@@ -9,7 +9,7 @@
     <link rel="stylesheet" id="main-stylesheet" data-version="1.1.0" href="styles/shards-dashboards.1.1.0.min.css">
     <link rel="stylesheet" href="styles/extras.1.1.0.min.css">
     <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <title>BDSX - Dashboard</title>
+    <title>BDSX Web Panel</title>
     <style>
       ::-webkit-scrollbar {
         display: none;
@@ -37,37 +37,37 @@
           <div class="nav-wrapper">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link" v-bind:class="(page === 'Overview')?'active':''" v-on:click="page = 'Overview'">
+                <a class="nav-link" :class="(page === 'Overview')?'active':''" v-on:click="page = 'Overview'">
                   <i class="material-icons">home</i>
                   <span>Overview</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link " v-bind:class="(page === 'Console')?'active':''" v-on:click="page = 'Console'">
+                <a class="nav-link " :class="(page === 'Console')?'active':''" v-on:click="page = 'Console'">
                   <i class="material-icons">dashboard</i>
                   <span>Console</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link " v-bind:class="(page === 'Plugins')?'active':''" v-on:click="page = 'Plugins'">
+                <a class="nav-link " :class="(page === 'Plugins')?'active':''" v-on:click="page = 'Plugins'">
                   <i class="material-icons">extension</i>
                   <span>Plugins</span>
                 </a>
               </li>
               <!-- <li class="nav-item">
-                <a class="nav-link " v-bind:class="(page === 'Logs')?'active':''" v-on:click="page = 'Logs'">
+                <a class="nav-link " :class="(page === 'Logs')?'active':''" v-on:click="page = 'Logs'">
                   <i class="material-icons">history</i>
                   <span>Logs</span>
                 </a>
               </li> -->
-              <!-- <li class="nav-item">
-                <a class="nav-link " v-bind:class="(page === 'Players')?'active':''" v-on:click="page = 'Players'">
+              <li class="nav-item">
+                <a class="nav-link " :class="(page === 'Players')?'active':''" v-on:click="page = 'Players'">
                   <i class="material-icons">people</i>
                   <span>Players</span>
                 </a>
-              </li> -->
+              </li>
               <!-- <li class="nav-item">
-                <a class="nav-link " v-bind:class="(page === 'Stats')?'active':''" v-on:click="page = 'Scoreboard'">
+                <a class="nav-link " :class="(page === 'Stats')?'active':''" v-on:click="page = 'Scoreboard'">
                   <i class="material-icons">format_list_numbered</i>
                   <span>Scoreboard</span>
                 </a>
@@ -351,16 +351,16 @@
                 <!-- Installed -->
                 <div class="card card-small">
                   <div class="card-header border-bottom">
-                    <h6 class="m-0">Installed</h6>
+                    <h6 class="m-0">Installed - {{ data.server.plugins.length }}</h6>
                   </div>
                   <div class="card-body p-0">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
                       <li class="list-group-item d-flex px-3" v-for="(item) in data.server.plugins">
                         <div>
                           <div class="text-muted">
-                            <strong class="text-secondary" href="#">{{ item.name.replace(/@.+\//, "") }}</strong> -
-                            <strong class="text-secondary" href="#">{{ item.json.version }}</strong> -
-                            <strong class="text-secondary" href="#">{{ item.json.author.name ?? item.json.author }}</strong>
+                            <strong class="text-secondary">{{ item.name.replace(/@.+\//, "") }}</strong> -
+                            <strong class="text-secondary">{{ item.json.version }}</strong> -
+                            <strong class="text-secondary">{{ item.json.author.name ?? item.json.author }}</strong>
                           </div>
                           <p class="m-0 my-1 mb-2 text-muted">{{ item.json.description }}</p>
                           <div>
@@ -387,16 +387,16 @@
                 <!-- Available -->
                 <div class="card card-small">
                   <div class="card-header border-bottom">
-                    <h6 class="m-0">Available</h6>
+                    <h6 class="m-0">Available - {{ data.server.onlinePlugins.length }}</h6>
                   </div>
                   <div class="card-body p-0">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
-                      <li class="list-group-item d-flex px-3" v-for="(item) in data.server.onlinePlugins">
+                      <li class="list-group-item d-flex px-3" v-for="(item) in data.server.onlinePlugins" @click="installPlugin(item.package.name)">
                         <div>
                           <div class="text-muted">
-                            <strong class="text-secondary" href="#">{{ item.package.name.replace(/@.+\//, "") }}</strong> -
-                            <strong class="text-secondary" href="#">{{ item.package.version }}</strong> -
-                            <strong class="text-secondary" href="#">{{ item.package.author?.name ?? item.package.publisher.username }}</strong>
+                            <strong class="text-secondary">{{ item.package.name.replace(/@.+\//, "") }}</strong> -
+                            <strong class="text-secondary">{{ item.package.version }}</strong> -
+                            <strong class="text-secondary">{{ item.package.author?.name ?? item.package.publisher.username }}</strong>
                           </div>
                           <p class="m-0 my-1 mb-2 text-muted">{{ item.package.description }}</p>
                           <div>
@@ -417,10 +417,95 @@
               </div>
             </div>
           </div>
+          <div class="main-content-container container-fluid px-4" v-show="page === 'Players'">
+            <!-- Page Header -->
+            <div class="page-header row no-gutters py-3">
+            </div>
+            <div class="row mb-4">
+              <div class="col-lg-6 col-md-12 col-sm-12 mb-4">
+                <!-- Online -->
+                <div class="card card-small">
+                  <div class="card-header border-bottom">
+                    <h6 class="m-0">Online - {{ Object.keys(data.server.game.players).length }}</h6>
+                  </div>
+                  <div class="card-body p-0">
+                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
+                      <li class="list-group-item d-flex px-3" :class="{ 'bg-primary': data.selectedPlayer?.uuid === uuid }" style="cursor: pointer;" v-for="([uuid, player]) in Object.entries(data.server.game.players)" @click="selectPlayer(player)">
+                        <img class="mr-1" :src="player.skin.head" width="20" height="20"></img>
+                        <strong :class="data.selectedPlayer?.uuid === uuid ? 'text-white' : 'text-secondary'">{{ player.name }}</strong>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="card-footer border-top">
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 col-md-12 col-sm-12 mb-4" v-show="data.selectedPlayer">
+                <!-- Selected Player -->
+                <div class="card card-small">
+                  <div class="card-header border-bottom">
+                    <h6 class="m-0">{{ data.selectedPlayer?.name }}</h6>
+                  </div>
+                  <div class="card-body p-0">
+                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
+                      <li class="list-group-item d-flex px-3">
+                        <div>
+                          <div class="text-muted">
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">tag</i>
+                              <strong class="mr-1">XUID:</strong>
+                              <strong class="text-primary">{{ data.selectedPlayer?.xuid }}</strong>
+                            </span>
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">fingerprint</i>
+                              <strong class="mr-1">UUID:</strong>
+                              <strong class="text-primary">{{ data.selectedPlayer?.uuid }}</strong>
+                            </span>
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">settings_input_antenna</i>
+                              <strong class="mr-1">Address:</strong>
+                              <strong class="text-primary">{{ data.selectedPlayer?.ip }}</strong>
+                            </span>
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">perm_device_information</i>
+                              <strong class="mr-1">Device ID:</strong>
+                              <strong class="text-primary">{{ data.selectedPlayer?.device.id }}</strong>
+                            </span>
+                            <br>
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">location_on</i>
+                              <strong class="mr-1">Block</strong>
+                              <strong class="text-info">{{ data.selectedPlayer?.gameInfo.pos.x.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.y.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.z.toFixed(3) }}</strong>
+                            </span>
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">screen_rotation</i>
+                              <strong class="mr-1">Facing</strong>
+                              <strong class="text-info">{{ data.selectedPlayer?.gameInfo.rot.x.toFixed(2) }} {{ data.selectedPlayer?.gameInfo.rot.y.toFixed(2) }}</strong>
+                            </span>
+                            <br>
+                            <!-- <div id="inventory-render"></div> -->
+                            <!-- <br> -->
+                            <div class="btn-group btn-group-sm">
+                              <button type="button" class="btn btn-white" @click="kickPlayer(data.selectedPlayer?.uuid)">
+                                <span class="text-danger">
+                                  <i class="material-icons">person_remove</i>
+                                </span> Kick </button>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="card-footer border-top">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.min.js" integrity="sha256-NGC9JEuTWN4GhTj091wctgjzftr+8WNDmw0H8J5YPYE=" crossorigin="anonymous"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.0/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
@@ -429,6 +514,7 @@
     <script src="scripts/extras.1.1.0.min.js"></script>
     <script src="scripts/shards-dashboards.1.1.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/gh/InventivetalentDev/MineRender@1.4.6/dist/gui.min.js"></script> -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
   </body>

@@ -2,6 +2,7 @@ import fs = require("fs");
 import path = require("path");
 import os = require("os");
 import pidusage = require("pidusage")
+import { NetworkIdentifier } from "bdsx/bds/networkidentifier";
 import { MinecraftPacketIds } from "bdsx/bds/packetids";
 import { TextPacket } from "bdsx/bds/packets";
 import { serverInstance } from "bdsx/bds/server";
@@ -82,10 +83,33 @@ interface PlayerData {
     uuid: string,
     xuid: string,
     ip: string,
+    skin: {
+        head: string,
+    },
     device: {
         type: DeviceOS,
         id: string,
     },
+    gameInfo?: {
+        pos: {
+            x: number,
+            y: number,
+            z: number,
+        },
+        rot: {
+            x: number,
+            y: number,
+        },
+        health: {
+            current: number,
+            max: number,
+        },
+        food: {
+            current: number,
+            max: number,
+        },
+        //inv: InventoryRenderer,
+    }
 }
 
 interface ServerData {
@@ -226,7 +250,7 @@ const data: ServerData = {
 };
 
 export const serverData = new DeepProxy(data, {
-    set: (data: any, path:string, value:any): boolean => {
+    set: (data: any, path:string[], value:any): boolean => {
         panel.io.emit(SocketEvents.SyncServerData, {
             path,
             value,
@@ -243,6 +267,7 @@ export const serverData = new DeepProxy(data, {
 }) as any as ServerData;
 
 let tps = 0;
+export const selectedPlayers = new Array<[string, NetworkIdentifier]>();
 bedrockServer.afterOpen().then(() => {
     const startTime = new Date().getTime();
     serverData.status = 1;
@@ -330,29 +355,225 @@ events.command.on((command, originName, ctx) => {
         return original(buffer, callback);
     };
 }
-events.packetAfter(MinecraftPacketIds.Login).on((pk, ni) => {
+events.packetAfter(MinecraftPacketIds.Login).on(async (pk, ni) => {
     const connreq = pk.connreq;
     if (connreq) {
         const cert = connreq.cert.json.value();
         const data = connreq.getJsonValue()!;
+
         const uuid = cert["extraData"]["identity"];
+
         serverData.server.game.players[uuid] = {
             name: cert["extraData"]["displayName"],
             uuid: uuid,
             xuid: cert["extraData"]["XUID"],
             ip: ni.getAddress().split("|")[0],
+            skin: {
+                head: "",
+            },
             device: {
                 type: data.DeviceOS,
                 id: data.DeviceId,
             }
         };
+
+        const geometryName = JSON.parse(Buffer.from(data.SkinResourcePatch, "base64").toString())["geometry"]["default"];
+        const geometryData = JSON.parse(Buffer.from(data.SkinGeometryData, "base64").toString());
+
+        const faceTextureOffset: [number, number] = [8, 8];
+        const faceTextureSize: [number, number] = [8, 8];
+
+        let fromAnimatedData = false;
+
+        if (geometryData === null) {
+            // HD skins
+            if (data.SkinImageHeight === 128) {
+                faceTextureOffset[0] = 16;
+                faceTextureOffset[1] = 16;
+
+                faceTextureSize[0] = 16;
+                faceTextureSize[1] = 16;
+            }
+        } else {
+            let geometry: {bones: any[]};
+
+            // Format version 1.12.0
+            if ("minecraft:geometry" in geometryData) {
+                const geometries = geometryData["minecraft:geometry"];
+                if (Array.isArray(geometries)) {
+                    geometry = geometryData["minecraft:geometry"].find((g: any) => g.description.identifier === geometryName);
+                } else {
+                geometry = geometryData["minecraft:geometry"][geometries];
+                }
+            }
+            // Fomrat version 1.8.0
+            else {
+                geometry = geometryData[geometryName];
+            }
+
+            const headModel = geometry.bones.find(b => b.name === "head");
+
+            if (headModel.cubes?.[0]?.uv) {
+                const uv = headModel.cubes[0].uv;
+                const size = headModel.cubes[0].size;
+
+                faceTextureOffset[0] = uv[0] + size[0];
+                faceTextureOffset[1] = uv[1] + size[1];
+
+                faceTextureSize[0] = size[0];
+                faceTextureSize[1] = size[1];
+            } else {
+                fromAnimatedData = true;
+            }
+        }
+
+        if (fromAnimatedData) {
+            serverData.server.game.players[uuid].skin.head = await Utils.readSkinBuffer(Buffer.from(data.AnimatedImageData[0].Image, "base64"), data.AnimatedImageData[0].ImageWidth, data.AnimatedImageData[0].ImageHeight, faceTextureOffset, faceTextureSize);
+        } else {
+            serverData.server.game.players[uuid].skin.head = await Utils.readSkinBuffer(Buffer.from(data.SkinData, "base64"), data.SkinImageWidth, data.SkinImageHeight, faceTextureOffset, faceTextureSize);
+        }
+
         Utils.players.set(uuid, ni);
     }
 });
+// events.packetRaw(MinecraftPacketIds.PlayerSkin).on(async (ptr, size, ni) => {
+//     for (const [uuid, _ni] of Utils.players) {
+//         if (_ni.equals(ni)) {
+//             console.log("started");
+//             ptr.move(1);
+//             ptr.readBin64();
+//             ptr.readBin64();
+//             const data: any = {};
+//             data.skinId = ptr.readVarString();
+//             data.skinPlayFabId = ptr.readVarString();
+//             data.skinResourcePatch = ptr.readVarString();
+//             data.skinData = {
+//                 width: ptr.readInt32(),
+//                 height: ptr.readInt32(),
+//                 data: ptr.readVarString(),
+//             };
+//             data.animations = [];
+//             for (let i = 0; i < ptr.readInt32(); i++) {
+//                 data.animations.push({
+//                     skinImage: {
+//                         width: ptr.readInt32(),
+//                         height: ptr.readInt32(),
+//                         data: ptr.readVarString(),
+//                     },
+//                     animationType : ptr.readInt32(),
+//                     animationFrames : ptr.readFloat64(),
+//                     expressionType : ptr.readInt32(),
+//                 });
+//             }
+//             data.capeData = {
+//                 width: ptr.readInt32(),
+//                 height: ptr.readInt32(),
+//                 data: ptr.readVarString(),
+//             };
+//             data.geometryData = ptr.readVarString();
+//             data.animationData = ptr.readVarString();
+//             data.premium = ptr.readBoolean();
+//             data.persona = ptr.readBoolean();
+//             data.capeOnClassic = ptr.readBoolean();
+//             data.capeId = ptr.readVarString();
+//             data.fullSkinId = ptr.readVarString();
+//             data.armSize = ptr.readVarString();
+//             data.skinColor = ptr.readVarString();
+//             data.personaPieces = [];
+//             for (let i = 0; i < ptr.readInt32(); i++) {
+//                 data.personaPieces.push({
+//                     pieceId: ptr.readVarString(),
+//                     pieceType: ptr.readVarString(),
+//                     packId: ptr.readVarString(),
+//                     isDefaultPiece: ptr.readBoolean(),
+//                     productId: ptr.readVarString(),
+//                 });
+//             }
+//             data.pieceTintColors = [];
+//             for (let i = 0; i < ptr.readInt32(); i++) {
+//                 const color = {
+//                     pieceType: ptr.readVarString(),
+//                     colors: new Array<string>(),
+//                 };
+//                 for (let j = 0; j < ptr.readInt32(); j++) {
+//                     color.colors.push(ptr.readVarString());
+//                 }
+//                 data.pieceTintColors.push(color);
+//             }
+
+//             console.log("mid1");
+
+//             const geometryName = JSON.parse(data.skinResourcePatch)["geometry"]["default"];
+//             console.log("mid2");
+//             const geometryData = JSON.parse(data.geometryData);
+//             console.log("mid3");
+
+//             const faceTextureOffset: [number, number] = [8, 8];
+//             const faceTextureSize: [number, number] = [8, 8];
+
+//             let fromAnimatedData = false;
+
+//             if (geometryData === null) {
+//                 // HD skins
+//                 if (data.skinData.height === 128) {
+//                     faceTextureOffset[0] = 16;
+//                     faceTextureOffset[1] = 16;
+
+//                     faceTextureSize[0] = 16;
+//                     faceTextureSize[1] = 16;
+//                 }
+//             } else {
+//                 let geometry: {bones: any[]};
+
+//                 // Format version 1.12.0
+//                 if ("minecraft:geometry" in geometryData) {
+//                     const geometries = geometryData["minecraft:geometry"];
+//                     if (Array.isArray(geometries)) {
+//                         geometry = geometryData["minecraft:geometry"].find((g: any) => g.description.identifier === geometryName);
+//                     } else {
+//                     geometry = geometryData["minecraft:geometry"][geometries];
+//                     }
+//                 }
+//                 // Fomrat version 1.8.0
+//                 else {
+//                     geometry = geometryData[geometryName];
+//                 }
+
+//                 const headModel = geometry.bones.find(b => b.name === "head");
+
+//                 if (headModel.cubes?.[0]?.uv) {
+//                     const uv = headModel.cubes[0].uv;
+//                     const size = headModel.cubes[0].size;
+
+//                     faceTextureOffset[0] = uv[0] + size[0];
+//                     faceTextureOffset[1] = uv[1] + size[1];
+
+//                     faceTextureSize[0] = size[0];
+//                     faceTextureSize[1] = size[1];
+//                 } else {
+//                     fromAnimatedData = true;
+//                 }
+
+//                 console.log("done1", data.skinData.data);
+//             }
+
+//             // Unknown encoding
+//             if (fromAnimatedData) {
+//                 serverData.server.game.players[uuid].skin.head = await Utils.readSkinBuffer(Buffer.from(data.animations[0].skinImage.data, "utf8"), data.animations[0].skinImage.width, data.animations[0].skinImage.height, faceTextureOffset, faceTextureSize);
+//             } else {
+//                 serverData.server.game.players[uuid].skin.head = await Utils.readSkinBuffer(Buffer.from(data.skinData.data, "utf8"), data.skinData.width, data.skinData.height, faceTextureOffset, faceTextureSize);
+//             }
+//             console.log("done2");
+//             break;
+//         }
+//     }
+// });
+
 events.networkDisconnected.on(data => {
     for (const [uuid, ni] of Utils.players) {
         if (ni.equals(data)) {
-            console.log(uuid, serverData.server.game.players);
+            selectedPlayers.splice(selectedPlayers.findIndex(e => e[0] === uuid), 1);
+            panel.io.emit(SocketEvents.StopRequestPlayerInfo, uuid);
             delete serverData.server.game.players[uuid];
             Utils.players.delete(uuid);
             break;
@@ -370,3 +591,27 @@ fs.watchFile(path.join(process.cwd(), "permissions.json"), (curr, prev) => {
 events.serverClose.on(() => {
     fs.unwatchFile(path.join(process.cwd(), "permissions.json"));
 });
+
+// Player Info
+events.packetAfter(MinecraftPacketIds.PlayerAuthInput).on((pk, ni) => {
+    for (const [uuid, _ni] of selectedPlayers) {
+        if (_ni.equals(ni)) {
+            serverData.server.game.players[uuid].gameInfo!.pos.x = pk.pos.x;
+            serverData.server.game.players[uuid].gameInfo!.pos.y = pk.pos.y;
+            serverData.server.game.players[uuid].gameInfo!.pos.z = pk.pos.z;
+            serverData.server.game.players[uuid].gameInfo!.rot.x = pk.pitch;
+            serverData.server.game.players[uuid].gameInfo!.rot.y = pk.yaw;
+            break;
+        }
+    }
+});
+// events.playerInventoryChange.on(event => {
+//     const ni = event.player.getNetworkIdentifier();
+//     for (const [uuid, _ni] of selectedPlayers) {
+//         if (_ni.equals(ni)) {
+//             serverData.server.game.players[uuid].gameInfo!.inv = new InventoryRenderer(event.player.getInventory());
+//             panel.io.emit(SocketEvents.UpdateRequestedPlayerInventory);
+//             break;
+//         }
+//     }
+// });

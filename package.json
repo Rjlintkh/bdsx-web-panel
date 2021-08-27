@@ -19,6 +19,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "pidusage": "^2.0.21",
-    "socket.io": "2.1.0"
+    "socket.io": "2.1.0",
+    "jimp": "^0.9.8"
   }
 }

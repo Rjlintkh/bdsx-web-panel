@@ -1,15 +1,18 @@
+import { AttributeId } from "bdsx/bds/attribute";
 import { TextPacket } from "bdsx/bds/packets";
+import { serverInstance } from "bdsx/bds/server";
 import { events } from "bdsx/event";
 import { bedrockServer } from "bdsx/launcher";
 import { loadedPlugins } from "bdsx/plugins";
 import { execSync } from "child_process";
 import { Utils } from "../utils";
-import { serverData } from "./data";
+import { selectedPlayers, serverData } from "./data";
 import { panel, SocketEvents } from "./server";
 
 panel.io.on("connection", (socket: any) => {
     Utils.fetchAllPlugins().then(plugins => {
         if (plugins !== null) {
+            serverData.server.onlinePlugins = [];
             for (const plugin of plugins) {
                 if (!loadedPlugins.includes(plugin.package.name)) {
                     serverData.server.onlinePlugins.push(plugin);
@@ -71,5 +74,36 @@ panel.io.on("connection", (socket: any) => {
     socket.on(SocketEvents.RemovePlugin, (plugin: string) => {
         execSync(`npm r ${plugin}`, {stdio:'inherit'});
         socket.emit(SocketEvents.Toast, `Tried to uninstall ${plugin}`);
+    });
+    socket.on(SocketEvents.StartRequestPlayerInfo, (uuid: string) => {
+        const ni = Utils.players.get(uuid);
+        const player = ni?.getActor();
+        if (player?.isPlayer()) {
+            selectedPlayers.push([uuid, ni!]);
+            serverData.server.game.players[uuid].gameInfo = {
+                pos: player.getPosition().toJSON(),
+                rot: player.getRotation().toJSON(),
+                health: {
+                    current: player.getHealth(),
+                    max: player.getMaxHealth(),
+                },
+                food: {
+                    current: player.getAttribute(AttributeId.PlayerSaturation),
+                    max: 20,
+                },
+                //inv: new InventoryRenderer(player.getInventory()),
+            };
+        }
+        socket.emit(SocketEvents.UpdateRequestedPlayerInventory);
+    });
+    socket.on(SocketEvents.StopRequestPlayerInfo, (uuid: string) => {
+        selectedPlayers.splice(selectedPlayers.findIndex(e => e[0] === uuid), 1);
+    });
+    socket.on(SocketEvents.KickPlayer, (uuid: string, reason: string | null) => {
+        if (reason === null) {
+            serverInstance.disconnectClient(Utils.players.get(uuid)!);
+        } else {
+            serverInstance.disconnectClient(Utils.players.get(uuid)!, reason);
+        }
     });
 });

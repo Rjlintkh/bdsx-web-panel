@@ -177,6 +177,10 @@ socket.on("Toast", message => {
     console.info("toast", message);
 });
 
+socket.on("disconnect", function () {
+    app.data.status = 0;
+  });
+
 window.addEventListener("beforeunload", () => {
     if (app.data.selectedPlayer?.uuid) {
         socket.emit("StopRequestPlayerInfo", player.uuid);

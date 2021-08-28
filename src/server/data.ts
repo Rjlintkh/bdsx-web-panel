@@ -88,8 +88,11 @@ interface PlayerData {
     },
     device: {
         type: DeviceOS,
+        model: string,
         id: string,
     },
+    version: string,
+    lang: string,
     gameInfo?: {
         pos: {
             x: number,
@@ -100,6 +103,7 @@ interface PlayerData {
             x: number,
             y: number,
         },
+        lvl: number,
         health: {
             current: number,
             max: number,
@@ -373,9 +377,17 @@ events.packetAfter(MinecraftPacketIds.Login).on(async (pk, ni) => {
             },
             device: {
                 type: data.DeviceOS,
+                model: data.DeviceModel,
                 id: data.DeviceId,
-            }
+            },
+            version: data.GameVersion,
+            lang: data.LanguageCode,
         };
+
+        try {
+            const languageNames = JSON.parse(fs.readFileSync(path.join(process.cwd(), "resource_packs", "vanilla", "texts", "language_names.json"), "utf8")) as [string, string][];
+            serverData.server.game.players[uuid].lang = languageNames.find(l => l[0] === data.LanguageCode)?.[1] ?? data.LanguageCode;
+        } catch { }
 
         const geometryName = JSON.parse(Buffer.from(data.SkinResourcePatch, "base64").toString())["geometry"]["default"];
         const geometryData = JSON.parse(Buffer.from(data.SkinGeometryData, "base64").toString());
@@ -602,6 +614,18 @@ events.packetAfter(MinecraftPacketIds.PlayerAuthInput).on((pk, ni) => {
             serverData.server.game.players[uuid].gameInfo!.rot.x = pk.pitch;
             serverData.server.game.players[uuid].gameInfo!.rot.y = pk.yaw;
             break;
+        }
+    }
+});
+events.entityHealthChange.on(event => {
+    if (event.entity.isPlayer()) {
+        const ni = event.entity.getNetworkIdentifier();
+        for (const [uuid, _ni] of selectedPlayers) {
+            if (_ni.equals(ni)) {
+                serverData.server.game.players[uuid].gameInfo!.health.current = event.newHealth;
+                serverData.server.game.players[uuid].gameInfo!.health.max = event.entity.getMaxHealth();
+                break;
+            }
         }
     }
 });

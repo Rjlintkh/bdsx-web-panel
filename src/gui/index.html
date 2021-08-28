@@ -314,7 +314,7 @@
                     <ul class="list-group list-group-flush">
                       <li class="list-group-item p-3">
                         <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">games</i>
+                          <i class="material-icons mr-1">tag</i>
                           <strong class="mr-1">Minecraft:</strong>
                           <strong class="text-muted">{{ data.server.version }}</strong>
                         </span>
@@ -550,7 +550,7 @@
                         <div>
                           <div class="text-muted">
                             <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">tag</i>
+                              <i class="material-icons mr-1">games</i>
                               <strong class="mr-1">XUID:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.xuid }}</strong>
                             </span>
@@ -559,15 +559,32 @@
                               <strong class="mr-1">UUID:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.uuid }}</strong>
                             </span>
+                            <br>
                             <span class="d-flex mb-2">
                               <i class="material-icons mr-1">settings_input_antenna</i>
                               <strong class="mr-1">Address:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.ip }}</strong>
                             </span>
                             <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">tag</i>
+                              <strong class="mr-1">Version:</strong>
+                              <strong class="text-primary">{{ data.selectedPlayer?.version }}</strong>
+                            </span>
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">language</i>
+                              <strong class="mr-1">Language:</strong>
+                              <strong class="text-primary">{{ data.selectedPlayer?.lang }}</strong>
+                            </span>
+                            <br>
+                            <span class="d-flex mb-2">
                               <i class="material-icons mr-1">perm_device_information</i>
-                              <strong class="mr-1">Device ID:</strong>
-                              <strong class="text-primary">{{ data.selectedPlayer?.device.id }}</strong>
+                              <strong class="mr-1">Device:</strong>
+                              <strong class="text-primary">{{ data.selectedPlayer?.device.model || "Not specified" }}</strong>
+                            </span>
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">perm_device_information</i>
+                              <strong class="mr-1">Platform:</strong>
+                              <strong class="text-primary">{{ ["Not specified", "Android", "iOS", "macOS", "Amazon", "Gear VR", "Hololens", "Windows 10", "Win 32", "Dedicated", "tvOS", "PS 4", "Nintendo", "Xbox", "Windows Phone"][data.selectedPlayer?.device.type] }}</strong>
                             </span>
                             <br>
                             <span class="d-flex mb-2">
@@ -579,6 +596,11 @@
                               <i class="material-icons mr-1">screen_rotation</i>
                               <strong class="mr-1">Facing</strong>
                               <strong class="text-info">{{ data.selectedPlayer?.gameInfo.rot.x.toFixed(2) }} {{ data.selectedPlayer?.gameInfo.rot.y.toFixed(2) }}</strong>
+                            </span>
+                            <span class="d-flex mb-2">
+                              <i class="material-icons mr-1">local_hospital</i>
+                              <strong class="mr-1">Health</strong>
+                              <strong class="text-info">{{ data.selectedPlayer?.gameInfo.health.current }}/{{ data.selectedPlayer?.gameInfo.health.max }}</strong>
                             </span>
                             <br>
                             <!-- <div id="inventory-render"></div> -->

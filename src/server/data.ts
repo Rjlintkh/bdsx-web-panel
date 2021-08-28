@@ -93,6 +93,7 @@ interface PlayerData {
     },
     version: string,
     lang: string,
+    scoreboardId?: number,
     gameInfo?: {
         pos: {
             x: number,
@@ -186,11 +187,11 @@ interface ServerData {
             players: Record<string, PlayerData>,
             objectives: Record<string, {
                 displayName: string,
-                scores: {
+                scores: Record<number, {
                     name: string,
-                    value: number
-                }
-            }[]>,
+                    value: number|string,
+                }>,
+            }>,
             permissions: any,
         }
     },
@@ -271,6 +272,41 @@ export const serverData = new DeepProxy(data, {
 }) as any as ServerData;
 
 let tps = 0;
+function refreshScoreboard() {
+    const scoreboard = serverInstance.minecraft.getLevel().getScoreboard();
+    for (const objective of scoreboard.getObjectives()) {
+        const scores: Record<number, {
+            name: string,
+            value: number|string,
+        }> = {};
+        console.log("OBJ", objective.name);
+        for (const scoreboardId of objective.getPlayers()) {
+            if (objective.getPlayerScore(scoreboardId).valid) {
+                scores[scoreboardId.idAsNumber] = {
+                    name: scoreboardId.identityDef.getName() ?? "Player Offline",
+                    value: objective.getPlayerScore(scoreboardId).value,
+                };
+            } else {
+                const tracked = scoreboard.getTrackedIds().find(id => id.identityDef.getName() === scoreboardId.identityDef.getName())!;
+                if (tracked) {
+                    scores[scoreboardId.idAsNumber] = {
+                        name: scoreboardId.identityDef.getName() ?? "Player Offline",
+                        value: objective.getPlayerScore(tracked).value,
+                    };
+                } else {
+                    scores[scoreboardId.idAsNumber] = {
+                        name: scoreboardId.identityDef.getName() ?? "Player Offline",
+                        value: "Untracked",
+                    };
+                }
+            }
+        }
+        serverData.server.game.objectives[objective.name] = {
+            displayName: objective.displayName,
+            scores,
+        };
+    }
+}
 export const selectedPlayers = new Array<[string, NetworkIdentifier]>();
 bedrockServer.afterOpen().then(() => {
     const startTime = new Date().getTime();
@@ -293,6 +329,7 @@ bedrockServer.afterOpen().then(() => {
             }
         });
     }
+    refreshScoreboard();
     Utils.fetchAllPlugins().then(plugins => {
         if (plugins !== null) {
             for (const plugin of plugins) {
@@ -586,6 +623,12 @@ events.networkDisconnected.on(data => {
         if (ni.equals(data)) {
             selectedPlayers.splice(selectedPlayers.findIndex(e => e[0] === uuid), 1);
             panel.io.emit(SocketEvents.StopRequestPlayerInfo, uuid);
+            const scoreboardId = serverData.server.game.players[uuid].scoreboardId!;
+            for (const [name, obj] of Object.entries(serverData.server.game.objectives)) {
+                if (obj.scores[scoreboardId]) {
+                    obj.scores[scoreboardId].name = "Player Offline";
+                }
+            }
             delete serverData.server.game.players[uuid];
             Utils.players.delete(uuid);
             break;
@@ -639,3 +682,21 @@ events.entityHealthChange.on(event => {
 //         }
 //     }
 // });
+events.objectiveCreate.on(event => {
+    serverData.server.game.objectives[event.name] = {
+        displayName: event.displayName,
+        scores: {},
+    };
+});
+events.playerJoin.on(event => {
+    const ni = event.player.getNetworkIdentifier();
+    for (const [uuid, _ni] of Utils.players) {
+        if (_ni.equals(ni)) {
+            serverData.server.game.players[uuid].scoreboardId = serverInstance.minecraft.getLevel().getScoreboard().getPlayerScoreboardId(event.player).idAsNumber;
+            break;
+        }
+    }
+});
+events.packetSend(MinecraftPacketIds.SetScore).on((pk, ni) => {
+    refreshScoreboard();
+});

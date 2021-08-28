@@ -269,12 +269,12 @@
                   <span>Players</span>
                 </a>
               </li>
-              <!-- <li class="nav-item">
+              <li class="nav-item">
                 <a class="nav-link " :class="(page === 'Stats')?'active':''" v-on:click="page = 'Scoreboard'">
                   <i class="material-icons">format_list_numbered</i>
                   <span>Scoreboard</span>
                 </a>
-              </li> -->
+              </li>
             </ul>
             <div class="col-lg col-md-6 col-sm-6 position-absolute mh-20" style="bottom: 0;">
               <div class="card card-small card-post mb-3">
@@ -687,7 +687,7 @@
                               <strong class="text-primary">{{ data.selectedPlayer?.device.model || "Not specified" }}</strong>
                             </span>
                             <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">perm_device_information</i>
+                              <i class="material-icons mr-1">memory</i>
                               <strong class="mr-1">Platform:</strong>
                               <strong class="text-primary">{{ ["Not specified", "Android", "iOS", "macOS", "Amazon", "Gear VR", "Hololens", "Windows 10", "Win 32", "Dedicated", "tvOS", "PS 4", "Nintendo", "Xbox", "Windows Phone"][data.selectedPlayer?.device.type] }}</strong>
                             </span>
@@ -717,6 +717,31 @@
                                 </span> Kick </button>
                           </div>
                         </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="card-footer border-top">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="main-content-container container-fluid px-4" v-show="page === 'Scoreboard'">
+            <!-- Page Header -->
+            <div class="page-header row no-gutters py-3">
+            </div>
+            <div class="row mb-4">
+                <!-- Objectives -->
+              <div class="col-lg-3 col-md-4 col-sm-6 mb-4" v-for="([name, objective]) in Object.entries(data.server.game.objectives)">
+                <div class="card card-small">
+                  <div class="card-header border-bottom">
+                    <h6 class="m-0">{{ objective.displayName }} <span class="text-muted">({{ name }})</span></h6>
+                  </div>
+                  <div class="card-body p-0" style="height: 320px;">
+                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
+                      <li class="list-group-item d-flex px-3" v-for="([id, score]) in Object.entries(objective.scores)">
+                        <span class="text-semibold text-fiord-blue">{{ score.name }}</span>
+                        <span class="ml-auto text-right text-semibold text-danger">{{ score.value }}</span>
                       </li>
                     </ul>
                   </div>

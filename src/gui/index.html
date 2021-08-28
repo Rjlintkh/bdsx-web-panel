@@ -14,6 +14,104 @@
       ::-webkit-scrollbar {
         display: none;
       }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #0a0907;
+        }
+
+        .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+          color: #fff;
+        }
+
+        .border-left {
+          border-left: 1px solid #343a40!important;
+        }
+
+        .border-right {
+          border-right: 1px solid #343a40!important;
+        }
+
+        .border-top {
+          border-top: 1px solid #343a40!important;
+        }
+
+        .border-bottom {
+          border-bottom: 1px solid #343a40!important;
+        }
+
+        .card {
+          background: #212529;
+          border: 1px solid rgba(255,255,255,.125);
+        }
+
+        .card-header {
+          background-color: rgba(255,255,255,.03);
+        }
+
+        .card-body {
+          color: #e9ecef;
+        }
+
+        .card-footer {
+          background-color: rgba(255,255,255,.03);
+        }
+
+        .list-group-item {
+          background-color: rgba(25,29,33,.05);
+        }
+
+        .form-control {
+          background-color: rgba(25,29,33,.05);
+          border: 1px solid #6c757d;
+        }
+
+        .form-control:focus {
+          color: #dee2e6;
+          background-color: #191d21;
+          border-color: #b3d7ff;
+        }
+
+        .btn {
+          background-color: transparent !important;
+          color: #fff !important;
+          border: 1px solid #343a40 !important;
+        }
+
+        .main-sidebar {
+          background-color: #191d21;
+          box-shadow: none;
+        }
+
+        .main-sidebar .toggle-sidebar {
+          border-left: 1px solid #343a40;
+        }
+
+        .navbar-light .navbar-brand {
+          color: #868e96;
+        }
+
+        .main-sidebar .nav .nav-item .nav-link {
+          border-bottom: 1px solid #343a40;
+          font-weight: 400;
+          color: #fff;
+          padding: .9375rem 1.5625rem;
+        }
+
+        .main-sidebar .nav .nav-item .nav-link.active, .main-sidebar .nav .nav-item .nav-link:hover, .main-sidebar .nav .nav-item.active, .main-sidebar .nav .nav-item:hover {
+          box-shadow: inset 0.1875rem 0 0 #007bff;
+          background-color: #343a40;
+          color: #007bff;
+        }
+
+        .bg-white {
+          background-color: #212529 !important;
+        }
+
+        .btn.btn-white {
+          border: 1px solid #343a40;
+        }
+      }
     </style>
   </head>
   <body class="h-100">

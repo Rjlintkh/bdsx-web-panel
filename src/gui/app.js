@@ -179,7 +179,8 @@ socket.on("Toast", message => {
 
 socket.on("disconnect", function () {
     app.data.status = 0;
-  });
+    app.data.selectedPlayer = undefined;
+});
 
 window.addEventListener("beforeunload", () => {
     if (app.data.selectedPlayer?.uuid) {

@@ -179,7 +179,7 @@ interface ServerData {
             console: {
                 log: string,
                 time: number
-            }[]
+            }[],
         },
         game: {
             tps: number,
@@ -337,7 +337,7 @@ events.packetBefore(MinecraftPacketIds.Text).on(pk => {
     if (pk.type === TextPacket.Types.Chat) {
         serverData.server.logs.chat.push({
             name: pk.name,
-            message: pk.message,
+            message: Utils.formatColorCodesToHTML(pk.message),
             time: new Date().getTime()
         });
     }
@@ -353,7 +353,7 @@ events.command.on((command, originName, ctx) => {
     const original = process.stdout.write.bind(process.stdout);
     process.stdout.write = (buffer: any, callback: any) => {
         serverData.server.logs.console.push({
-            log: buffer.toString().replace(/(\[\d+m|\u001b)/g, ""),
+            log: Utils.formatConsoleCodesToHTML(buffer.toString()/*.replace(/(\[\d+m|\u001b)/g, "")*/),
             time: new Date().getTime(),
         });
         return original(buffer, callback);

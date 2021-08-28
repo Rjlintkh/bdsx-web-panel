@@ -15,7 +15,112 @@
         display: none;
       }
 
+      .mc-0 {
+        color: #000000 !important;
+      }
+
+      .mc-1 {
+        color: #0000AA !important;
+      }
+
+      .mc-2 {
+        color: #00AA00 !important;
+      }
+
+      .mc-3 {
+        color: #00AAAA !important;
+      }
+
+      .mc-4 {
+        color: #AA0000 !important;
+      }
+
+      .mc-5 {
+        color: #AA00AA !important;
+      }
+
+      .mc-6 {
+        color: #FFAA00 !important;
+      }
+
+      .mc-7 {
+        color: #AAAAAA !important;
+      }
+
+      .mc-8 {
+        color: #555555 !important;
+      }
+
+      .mc-9 {
+        color: #5555FF !important;
+      }
+
+      .mc-a {
+        color: #55FF55 !important;
+      }
+
+      .mc-b {
+        color: #55FFFF !important;
+      }
+
+      .mc-c {
+        color: #FF5555 !important;
+      }
+
+      .mc-d {
+        color: #FF55FF !important;
+      }
+
+      .mc-e {
+        color: #FFFF55 !important;
+      }
+
+      .mc-f {
+        color: #FFFFFF !important;
+        text-shadow: #000 1px 1px;
+      }
+
+      .mc-g {
+        color: #DDD605 !important;
+      }
+
+      .mc-k {
+        filter: blur(2px);
+      }
+
+      .mc-l {
+        font-weight: 800 !important;
+      }
+
+      .mc-m {
+        text-decoration: line-through;
+      }
+
+      .mc-n {
+        text-decoration: underline;
+      }
+
+      .mc-o {
+        font-style: italic;
+      }
+
+      .mc-r {
+        color: #5a6169;
+        opacity: initial;
+        font-style: initial;
+        font-weight: 500;
+        text-decoration: none;
+      }
+
       @media (prefers-color-scheme: dark) {
+        .mc-f {
+          text-shadow: none;
+        }
+
+        .mc-r {
+          color: #fff;
+        }
+
         body {
           background: #131518;
         }
@@ -389,7 +494,7 @@
                     <ul class="list-group list-group-small list-group-flush overflow-auto d-flex flex-column-reverse">
                       <li v-for="(item) in data.server.logs.console.slice().reverse()">
                         <span class="text-primary">{{ new Date(item.time).toLocaleTimeString() }}</span>
-                        {{ item.log }}
+                        <span v-html="item.log"></span>
                       </li>
                     </ul>
                   </div>
@@ -429,7 +534,7 @@
                           <ul class="list-group list-group-small list-group-flush overflow-auto d-flex flex-column-reverse">
                             <li v-for="(item) in data.server.logs.chat.slice().reverse()">
                               <span class="text-primary">{{ new Date(item.time).toLocaleTimeString() }}</span>
-                              &lt;{{ item.name }}&gt; {{ item.message }}
+                              &lt;{{ item.name }}&gt; <span v-html="item.message"></span>
                             </li>
                           </ul>
                         </div>

@@ -3,10 +3,98 @@ import os = require("os");
 import Jimp = require("jimp");
 import { NetworkIdentifier } from "bdsx/bds/networkidentifier";
 import { Packet } from "bdsx/bds/packet";
+import { panel } from "./server/server";
 
 export namespace Utils {
     export const players = new Map<string, NetworkIdentifier>();
     const skins = new Map<string, NetworkIdentifier>();
+
+    export function escapeUnsafeHTML(unsafe: string): string {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    export function formatConsoleCodesToHTML(text: string): string {
+        return Utils.escapeUnsafeHTML(text).replace(/\u001b\[(\d)+m/g, m => {
+            switch (m) {
+            case "\u001b[22m":
+            case "\u001b[23m":
+            case "\u001b[24m":
+            case "\u001b[27m":
+            case "\u001b[28m":
+            case "\u001b[29m":
+            case "\u001b[39m":
+                return "</span>";
+            case "\u001b[30m":
+                return `<span class="mc-0">`;
+            case "\u001b[31m":
+                return `<span class="mc-4">`;
+            case "\u001b[32m":
+                return `<span class="mc-2">`;
+            case "\u001b[33m":
+                return `<span class="mc-6">`;
+            case "\u001b[34m":
+                return `<span class="mc-1">`;
+            case "\u001b[35m":
+                return `<span class="mc-5">`;
+            case "\u001b[36m":
+                return `<span class="mc-3">`;
+            case "\u001b[37m":
+                return `<span class="mc-7">`;
+            case "\u001b[90m":
+                return `<span class="mc-8">`;
+            case "\u001b[91m":
+                return `<span class="mc-c">`;
+            case "\u001b[92m":
+                return `<span class="mc-a">`;
+            case "\u001b[93m":
+                return `<span class="mc-e">`;
+            case "\u001b[94m":
+                return `<span class="mc-9">`;
+            case "\u001b[95m":
+                return `<span class="mc-d">`;
+            case "\u001b[96m":
+                return `<span class="mc-b">`;
+            case "\u001b[97m":
+                return `<span class="mc-f">`;
+            case "\u001b[0m":
+                return `<span class="mc-r">`;
+            case "\u001b[1m":
+                return `<span class="mc-l">`;
+            // case "\u001b[2m":
+            //     return lazy();
+            case "\u001b[3m":
+                return `<span class="mc-o">`;
+            case "\u001b[4m":
+                return `<span class="mc-n">`;
+            // case "\u001b[7m":
+            //     return lazy();
+            case "\u001b[8m":
+                return `<span style="opacity: 0>`;
+            case "\u001b[9m":
+                return `<span class="mc-m">`;
+            default:
+                panel.toast(m);
+                return "<span>";
+            }
+        });
+    };
+
+    export function formatColorCodesToHTML(text: string): string {
+        let count = 0;
+        const out = Utils.escapeUnsafeHTML(text).replace(/§./g, m => {
+            count++;
+            if (m[1] !== "r") {
+                return `<span class="mc-${m[1]}">`;
+            }
+            return `${"</span>".repeat(count)}<span>`;
+        });
+        return `${out}${"</span>".repeat(count)}`;
+    };
 
     export function parseProperties(properties: string): { [key: string]: string } {
         let retval: {[key: string]: string} = {};

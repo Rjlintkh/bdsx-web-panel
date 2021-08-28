@@ -50,7 +50,7 @@ panel.io.on("connection", (socket: any) => {
         socket.emit(SocketEvents.Toast, "Message sent");
         serverData.server.logs.chat.push({
             name: panel.config["chat_name"],
-            message: chat,
+            message: Utils.formatColorCodesToHTML(chat),
             time: new Date().getTime(),
         });
     });
@@ -83,6 +83,7 @@ panel.io.on("connection", (socket: any) => {
             serverData.server.game.players[uuid].gameInfo = {
                 pos: player.getPosition().toJSON(),
                 rot: player.getRotation().toJSON(),
+                lvl: player.getAttribute(AttributeId.PlayerLevel),
                 health: {
                     current: player.getHealth(),
                     max: player.getMaxHealth(),

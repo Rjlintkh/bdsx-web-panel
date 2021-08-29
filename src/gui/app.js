@@ -95,6 +95,9 @@ const app = new Vue({
         kickPlayer: (uuid, reason = null) => {
             socket.emit("KickPlayer", uuid, reason);
         },
+        setScore: (sid, obj, score) => {
+            socket.emit("SetScore", sid, obj, score);
+        },
     }
 });
 
@@ -173,8 +176,23 @@ socket.on("StopRequestPlayerInfo", uuid => {
     }
 });
 
-socket.on("Toast", message => {
-    console.info("toast", message);
+socket.on("Toast", (message, type = "secondary", timeout = 3000) => {
+    const toast = document.createElement("div");
+    toast.className = `alert alert-${type} fixed-bottom mb-0`;
+    toast.style.zIndex = "1070";
+    toast.style.bottom = "-50px";
+    toast.innerHTML = message;
+    toast.style.transition = "bottom 0.3s";
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.bottom = "0";
+    }, 300);
+    setTimeout(() => {
+        toast.style.bottom = "-50px";
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, timeout);
 });
 
 socket.on("disconnect", function () {

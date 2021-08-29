@@ -270,7 +270,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link " :class="(page === 'Stats')?'active':''" v-on:click="page = 'Scoreboard'">
+                <a class="nav-link " :class="(page === 'Scoreboard')?'active':''" v-on:click="page = 'Scoreboard'">
                   <i class="material-icons">format_list_numbered</i>
                   <span>Scoreboard</span>
                 </a>
@@ -510,7 +510,7 @@
                       </div>
                       <div class="card-body p-0" style="height: 320px;">
                         <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
-                          <li class="list-group-item d-flex px-3" v-for="(item) in data.server.game.permissions">
+                          <li class="list-group-item border-bottom d-flex px-3" v-for="(item) in data.server.game.permissions">
                             <span class="text-semibold text-fiord-blue">{{ item.xuid }}</span>
                             <span class="ml-auto text-right text-semibold text-reagent-gray text-capitalize">{{ item.permission }}</span>
                           </li>
@@ -561,7 +561,7 @@
                       <li class="list-group-item d-flex px-3" v-for="(item) in data.server.plugins">
                         <div>
                           <div class="text-muted">
-                            <strong class="text-secondary">{{ item.name.replace(/@.+\//, "") }}</strong> -
+                            <strong class="text-secondary" style="text-transform: capitalize;">{{ item.name.replace(/^@.+\//, "").replace(/-/g, " ") }}</strong> -
                             <strong class="text-secondary">{{ item.json.version }}</strong> -
                             <strong class="text-secondary">{{ item.json.author.name ?? item.json.author }}</strong>
                           </div>
@@ -597,7 +597,7 @@
                       <li class="list-group-item d-flex px-3" v-for="(item) in data.server.onlinePlugins" @click="installPlugin(item.package.name)">
                         <div>
                           <div class="text-muted">
-                            <strong class="text-secondary">{{ item.package.name.replace(/@.+\//, "") }}</strong> -
+                            <strong class="text-secondary" style="text-transform: capitalize;">{{ item.package.name.replace(/^@.+\//, "").replace(/-/g, " ") }}</strong> -
                             <strong class="text-secondary">{{ item.package.version }}</strong> -
                             <strong class="text-secondary">{{ item.package.author?.name ?? item.package.publisher.username }}</strong>
                           </div>
@@ -739,7 +739,7 @@
                   </div>
                   <div class="card-body p-0" style="height: 320px;">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
-                      <li class="list-group-item d-flex px-3" v-for="([id, score]) in Object.entries(objective.scores)">
+                      <li class="list-group-item border-bottom d-flex px-3" v-for="([id, score]) in Object.entries(objective.scores)">
                         <span class="text-semibold text-fiord-blue">{{ score.name }}</span>
                         <span class="ml-auto text-right text-semibold text-danger">{{ score.value }}</span>
                       </li>

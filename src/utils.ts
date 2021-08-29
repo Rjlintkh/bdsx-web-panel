@@ -3,7 +3,6 @@ import os = require("os");
 import Jimp = require("jimp");
 import { NetworkIdentifier } from "bdsx/bds/networkidentifier";
 import { Packet } from "bdsx/bds/packet";
-import { panel } from "./server/server";
 
 export namespace Utils {
     export const players = new Map<string, NetworkIdentifier>();
@@ -78,7 +77,6 @@ export namespace Utils {
             case "\u001b[9m":
                 return `<span class="mc-m">`;
             default:
-                panel.toast(m);
                 return "<span>";
             }
         });
@@ -95,6 +93,10 @@ export namespace Utils {
         });
         return `${out}${"</span>".repeat(count)}`;
     };
+
+    export function formatPluginName(name: string): string {
+        return name.replace(/^@.+\//, "").replace(/-/g, " ").replace(/\w\S*/g, m => m[0].toUpperCase() + m.substr(1).toLowerCase());
+    }
 
     export function parseProperties(properties: string): { [key: string]: string } {
         let retval: {[key: string]: string} = {};

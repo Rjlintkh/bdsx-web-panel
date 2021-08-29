@@ -24,11 +24,12 @@ export enum SocketEvents {
     InstallPlugin = "InstallPlugin",
     RemovePlugin = "RemovePlugin",
 
-    // Players
+    // Game
     StartRequestPlayerInfo = "StartRequestPlayerInfo",
     StopRequestPlayerInfo = "StopRequestPlayerInfo",
     UpdateRequestedPlayerInventory = "UpdateRequestedPlayerInventory",
     KickPlayer = "KickPlayer",
+    SetScore = "SetScore",
 }
 
 
@@ -78,8 +79,8 @@ class ServerPanel {
             }
         }, 3000).unref();
     }
-    toast(message: string) {
-        this.io.emit(SocketEvents.Toast, message);
+    toast(message: string, type: string = "secondary", timeout: number = 3000) {
+        this.io.emit(SocketEvents.Toast, message, type, timeout);
     }
 }
 

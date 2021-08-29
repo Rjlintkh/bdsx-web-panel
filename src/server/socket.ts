@@ -27,9 +27,11 @@ panel.io.on("connection", (socket: any) => {
     socket.emit(SocketEvents.UpdateResourceUsage);
 
     socket.on(SocketEvents.StopServer, () => {
+        panel.toast("Stopping server.");
        bedrockServer.stop();
     });
     socket.on(SocketEvents.RestartServer, () => {
+        panel.toast("Restarting server.");
         events.serverStop.on(() => {
             setTimeout(() => {
                 execSync(process.argv.join(" "), {stdio: "inherit"});
@@ -38,7 +40,7 @@ panel.io.on("connection", (socket: any) => {
         bedrockServer.stop();
     });
     socket.on(SocketEvents.InputCommand, (command: string) => {
-       socket.emit(SocketEvents.Toast, "Command sent");
+       panel.toast("Command sent.", "success");
        bedrockServer.executeCommandOnConsole(command);
     });
     socket.on(SocketEvents.InputChat, (chat: string) => {
@@ -47,7 +49,7 @@ panel.io.on("connection", (socket: any) => {
         pk.name = panel.config["chat_name"];
         pk.message = chat;
         Utils.broadcastPacket(pk);
-        socket.emit(SocketEvents.Toast, "Message sent");
+        panel.toast("Message sent.", "success");
         serverData.server.logs.chat.push({
             name: panel.config["chat_name"],
             message: Utils.formatColorCodesToHTML(chat),
@@ -58,22 +60,22 @@ panel.io.on("connection", (socket: any) => {
         const update = await Utils.checkForPluginUpdates(plugin, version);
         switch (update) {
         case "not on npm":
-            socket.emit(SocketEvents.Toast, "Plugin not on npm");
+            panel.toast(`${Utils.formatPluginName(plugin)} is not on npm.`, "danger");
             break;
         case "up to date":
-            socket.emit(SocketEvents.Toast, "Plugin is up to date");
+            panel.toast(`${Utils.formatPluginName(plugin)} is up to date.`, "success");
             break;
         default:
-            socket.emit(SocketEvents.Toast, `Plugin update available (${update})`);
+            panel.toast(`${Utils.formatPluginName(plugin)} has an available update of ${update}.`, "success");
         }
     });
     socket.on(SocketEvents.InstallPlugin, (plugin: string, version?: string) => {
         execSync(`npm i ${plugin}${version ? "@" + version : ""}`, {stdio:'inherit'});
-        socket.emit(SocketEvents.Toast, `Tried to install ${plugin}`);
+        panel.toast(`Installed ${plugin}, it will be loaded on the next restart.`, "warning");
     });
     socket.on(SocketEvents.RemovePlugin, (plugin: string) => {
         execSync(`npm r ${plugin}`, {stdio:'inherit'});
-        socket.emit(SocketEvents.Toast, `Tried to uninstall ${plugin}`);
+        panel.toast(`Uninstalled ${plugin}, it will not be loaded on the next restart.`, "warning");
     });
     socket.on(SocketEvents.StartRequestPlayerInfo, (uuid: string) => {
         const ni = Utils.players.get(uuid);
@@ -101,10 +103,15 @@ panel.io.on("connection", (socket: any) => {
         selectedPlayers.splice(selectedPlayers.findIndex(e => e[0] === uuid), 1);
     });
     socket.on(SocketEvents.KickPlayer, (uuid: string, reason: string | null) => {
-        if (reason === null) {
-            serverInstance.disconnectClient(Utils.players.get(uuid)!);
-        } else {
-            serverInstance.disconnectClient(Utils.players.get(uuid)!, reason);
+        const ni = Utils.players.get(uuid)!;
+        if (ni) {
+            const name = ni.getActor()!.getName();
+            if (reason === null) {
+                serverInstance.disconnectClient(ni);
+            } else {
+                serverInstance.disconnectClient(ni, reason);
+            }
+            panel.toast(`Kicked ${name}.`, "success");
         }
     });
 });

@@ -79,7 +79,7 @@ class ServerPanel {
             }
         }, 3000).unref();
     }
-    toast(message: string, type: string = "secondary", timeout: number = 3000) {
+    toastAll(message: string, type: string = "secondary", timeout: number = 3000) {
         this.io.emit(SocketEvents.Toast, message, type, timeout);
     }
 }

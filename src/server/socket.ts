@@ -27,11 +27,11 @@ panel.io.on("connection", (socket: any) => {
     socket.emit(SocketEvents.UpdateResourceUsage);
 
     socket.on(SocketEvents.StopServer, () => {
-        panel.toast("Stopping server.");
+        socket.emit(SocketEvents.Toast, "Stopping server.");
        bedrockServer.stop();
     });
     socket.on(SocketEvents.RestartServer, () => {
-        panel.toast("Restarting server.");
+        socket.emit(SocketEvents.Toast, "Restarting server.");
         events.serverStop.on(() => {
             setTimeout(() => {
                 execSync(process.argv.join(" "), {stdio: "inherit"});
@@ -40,8 +40,8 @@ panel.io.on("connection", (socket: any) => {
         bedrockServer.stop();
     });
     socket.on(SocketEvents.InputCommand, (command: string) => {
-       panel.toast("Command sent.", "success");
-       bedrockServer.executeCommandOnConsole(command);
+        socket.emit(SocketEvents.Toast, "Command sent.", "success");
+        bedrockServer.executeCommandOnConsole(command);
     });
     socket.on(SocketEvents.InputChat, (chat: string) => {
         const pk = TextPacket.create();
@@ -49,7 +49,7 @@ panel.io.on("connection", (socket: any) => {
         pk.name = panel.config["chat_name"];
         pk.message = chat;
         Utils.broadcastPacket(pk);
-        panel.toast("Message sent.", "success");
+        socket.emit(SocketEvents.Toast, "Message sent.", "success");
         serverData.server.logs.chat.push({
             name: panel.config["chat_name"],
             message: Utils.formatColorCodesToHTML(chat),
@@ -60,22 +60,24 @@ panel.io.on("connection", (socket: any) => {
         const update = await Utils.checkForPluginUpdates(plugin, version);
         switch (update) {
         case "not on npm":
-            panel.toast(`${Utils.formatPluginName(plugin)} is not on npm.`, "danger");
+            socket.emit(SocketEvents.Toast, `${Utils.formatPluginName(plugin)} is not on npm.`, "danger");
             break;
         case "up to date":
-            panel.toast(`${Utils.formatPluginName(plugin)} is up to date.`, "success");
+            socket.emit(SocketEvents.Toast, `${Utils.formatPluginName(plugin)} is up to date.`, "success");
             break;
         default:
-            panel.toast(`${Utils.formatPluginName(plugin)} has an available update of ${update}.`, "success");
+            socket.emit(SocketEvents.Toast, `${Utils.formatPluginName(plugin)} has an available update of ${update}.`, "success");
         }
     });
     socket.on(SocketEvents.InstallPlugin, (plugin: string, version?: string) => {
+        socket.emit(SocketEvents.Toast, `Installing ${Utils.formatPluginName(plugin)}.`);
         execSync(`npm i ${plugin}${version ? "@" + version : ""}`, {stdio:'inherit'});
-        panel.toast(`Installed ${plugin}, it will be loaded on the next restart.`, "warning");
+        socket.emit(SocketEvents.Toast, `Installed ${Utils.formatPluginName(plugin)}, it will be loaded on the next restart.`, "warning");
     });
     socket.on(SocketEvents.RemovePlugin, (plugin: string) => {
+        socket.emit(SocketEvents.Toast, `Uninstalling ${Utils.formatPluginName(plugin)}.`);
         execSync(`npm r ${plugin}`, {stdio:'inherit'});
-        panel.toast(`Uninstalled ${plugin}, it will not be loaded on the next restart.`, "warning");
+        socket.emit(SocketEvents.Toast, `Uninstalled ${Utils.formatPluginName(plugin)}, it will not be loaded on the next restart.`, "warning");
     });
     socket.on(SocketEvents.StartRequestPlayerInfo, (uuid: string) => {
         const ni = Utils.players.get(uuid);
@@ -111,7 +113,7 @@ panel.io.on("connection", (socket: any) => {
             } else {
                 serverInstance.disconnectClient(ni, reason);
             }
-            panel.toast(`Kicked ${name}.`, "success");
+            socket.emit(SocketEvents.Toast, `Kicked ${name}.`, "success");
         }
     });
 });

@@ -61,8 +61,65 @@ const app = new Vue({
         }
     },
     methods: {
-        stopServer: () => socket.emit("StopServer"),
-        restartServer: () => socket.emit("RestartServer"),
+        modal: (title, content, primary, secondary, callback) => {
+            const backdrop = document.createElement("div");
+            backdrop.className = "modal-backdrop fade show";
+            backdrop.style.zIndex = "1080";
+            document.body.appendChild(backdrop);
+            const modal = document.createElement("div");
+            modal.className = "modal fade";
+            modal.style.zIndex = "1090";
+            modal.tabIndex = "-1";
+            modal.role = "dialog";
+            modal.setAttribute("aria-hidden", "true");
+            modal.innerHTML = 
+                `<div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle">${title}</h5>
+                            <button type="button" class="close" data-dismiss aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            ${content}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss>${secondary}</button>
+                            <button type="button" class="btn btn-primary">${primary}</button>
+                        </div>
+                    </div>
+                </div>`;
+            modal.querySelectorAll("button").forEach(element => {
+                element.addEventListener("click", () => {
+                    callback(element.getAttribute("data-dismiss") === null);
+                    document.body.removeChild(backdrop);
+                    modal.classList.remove("show");
+                    setTimeout(() => {
+                        document.body.removeChild(modal);
+                    }, 150);
+                });
+            });
+            document.body.appendChild(modal);
+            modal.style.display = "block";
+            setTimeout(() => {
+                modal.classList.add("show");
+            }, 150);
+        },
+        stopServer: () => {
+            app.modal("Stop Server", "Are you sure you want to stop the server?", "Stop", "Cancel", confirm => {
+                if (confirm) {
+                    socket.emit("StopServer")
+                }
+            });
+        },
+        restartServer: () => {
+            app.modal("Restart Server", "Are you sure you want to restart the server?", "Restart", "Cancel", confirm => {
+                if (confirm) {
+                    socket.emit("RestartServer")
+                }
+            });
+        },
         command: ev => {
             socket.emit("InputCommand", ev.target.value);
             ev.target.value = "";
@@ -75,10 +132,18 @@ const app = new Vue({
             socket.emit("CheckForPluginUpdates", plugin, version);
         },
         installPlugin: (plugin, version) => {
-            socket.emit("InstallPlugin", plugin, version);
+            app.modal("Install Plugin", `Are you sure you want to install the plugin ${plugin}?`, "Install", "Cancel", confirm => {
+                if (confirm) {
+                    socket.emit("InstallPlugin", plugin, version);
+                }
+            });
         },
         removePlugin: plugin => {
-            socket.emit("RemovePlugin", plugin);
+            app.modal("Remove Plugin", `Are you sure you want to remove the plugin ${plugin}?`, "Remove", "Cancel", confirm => {
+                if (confirm) {
+                    socket.emit("RemovePlugin", plugin);
+                }
+            });
         },
         selectPlayer: player => {
             if (app.data.selectedPlayer?.uuid === player.uuid) {
@@ -93,7 +158,11 @@ const app = new Vue({
             }
         },
         kickPlayer: (uuid, reason = null) => {
-            socket.emit("KickPlayer", uuid, reason);
+            app.modal("Kick Player", `Are you sure you want to kick ${app.data.selectedPlayer.name}?`, "Kick", "Cancel", confirm => {
+                if (confirm) {
+                    socket.emit("KickPlayer", uuid, reason);
+                }
+            });
         },
         setScore: (sid, obj, score) => {
             socket.emit("SetScore", sid, obj, score);

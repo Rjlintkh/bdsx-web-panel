@@ -274,31 +274,19 @@ export const serverData = new DeepProxy(data, {
 let tps = 0;
 function refreshScoreboard() {
     const scoreboard = serverInstance.minecraft.getLevel().getScoreboard();
+    const trackedIds = scoreboard.getTrackedIds();
     for (const objective of scoreboard.getObjectives()) {
         const scores: Record<number, {
             name: string,
             value: number|string,
         }> = {};
-        console.log("OBJ", objective.name);
-        for (const scoreboardId of objective.getPlayers()) {
-            if (objective.getPlayerScore(scoreboardId).valid) {
+        for (const scoreboardId of trackedIds) {
+            const score = objective.getPlayerScore(scoreboardId);
+            if (score.valid) {
                 scores[scoreboardId.idAsNumber] = {
                     name: scoreboardId.identityDef.getName() ?? "Player Offline",
-                    value: objective.getPlayerScore(scoreboardId).value,
+                    value: score.value,
                 };
-            } else {
-                const tracked = scoreboard.getTrackedIds().find(id => id.identityDef.getName() === scoreboardId.identityDef.getName())!;
-                if (tracked) {
-                    scores[scoreboardId.idAsNumber] = {
-                        name: scoreboardId.identityDef.getName() ?? "Player Offline",
-                        value: objective.getPlayerScore(tracked).value,
-                    };
-                } else {
-                    scores[scoreboardId.idAsNumber] = {
-                        name: scoreboardId.identityDef.getName() ?? "Player Offline",
-                        value: "Untracked",
-                    };
-                }
             }
         }
         serverData.server.game.objectives[objective.name] = {

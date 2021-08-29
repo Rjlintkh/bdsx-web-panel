@@ -4,6 +4,9 @@ import { serverProperties } from "bdsx/serverproperties";
 import { serverData } from "./data";
 
 export enum SocketEvents {
+    // Login
+    Login = "Login",
+
     // Data
     SyncServerData = "SyncServerData",
     UpdateResourceUsage = "UpdateResourceUsage",

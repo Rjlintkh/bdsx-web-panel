@@ -171,6 +171,10 @@
           border: 1px solid #6c757d;
         }
 
+        .form-group label {
+          color: #fff;
+        }
+
         .form-control:focus {
           color: #dee2e6;
           background-color: #191d21;
@@ -209,6 +213,11 @@
           color: #007bff;
         }
 
+        .custom-control-label::before {
+          background-color: rgba(25,29,33,.05);
+          border: 1px solid #6c757d;
+        }
+
         .bg-white {
           background-color: #212529 !important;
         }
@@ -220,8 +229,8 @@
     </style>
   </head>
   <body class="h-100">
-    <div class="container-fluid" id="app">
-      <div class="row">
+    <div class="container-fluid h-100" id="app">
+      <div class="row" v-show="authenticated">
         <!-- Main Sidebar -->
         <aside class="main-sidebar col-12 col-md-3 col-lg-2 px-0">
           <div class="main-navbar">
@@ -240,43 +249,43 @@
           <div class="nav-wrapper">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link" :class="(page === 'Overview')?'active':''" v-on:click="page = 'Overview'">
+                <a class="nav-link" :class="(page === 'Overview')?'active':''" @click="page = 'Overview'">
                   <i class="material-icons">home</i>
                   <span>Overview</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link " :class="(page === 'Console')?'active':''" v-on:click="page = 'Console'">
+                <a class="nav-link " :class="(page === 'Console')?'active':''" @click="page = 'Console'">
                   <i class="material-icons">dashboard</i>
                   <span>Console</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link " :class="(page === 'Plugins')?'active':''" v-on:click="page = 'Plugins'">
+                <a class="nav-link " :class="(page === 'Plugins')?'active':''" @click="page = 'Plugins'">
                   <i class="material-icons">extension</i>
                   <span>Plugins</span>
                 </a>
               </li>
               <!-- <li class="nav-item">
-                <a class="nav-link " :class="(page === 'Logs')?'active':''" v-on:click="page = 'Logs'">
+                <a class="nav-link " :class="(page === 'Logs')?'active':''" @click="page = 'Logs'">
                   <i class="material-icons">history</i>
                   <span>Logs</span>
                 </a>
               </li> -->
               <li class="nav-item">
-                <a class="nav-link " :class="(page === 'Players')?'active':''" v-on:click="page = 'Players'">
+                <a class="nav-link " :class="(page === 'Players')?'active':''" @click="page = 'Players'">
                   <i class="material-icons">people</i>
                   <span>Players</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link " :class="(page === 'Scoreboard')?'active':''" v-on:click="page = 'Scoreboard'">
+                <a class="nav-link " :class="(page === 'Scoreboard')?'active':''" @click="page = 'Scoreboard'">
                   <i class="material-icons">format_list_numbered</i>
                   <span>Scoreboard</span>
                 </a>
               </li>
             </ul>
-            <div class="col-lg col-md-6 col-sm-6 position-absolute mh-20" style="bottom: 0;">
+            <div class="col-12 position-absolute mh-20" style="bottom: 0;">
               <div class="card card-small card-post mb-3">
                 <div class="card-body">
                   <h6 class="card-title text-truncate">
@@ -289,11 +298,11 @@
                 </div>
                 <div class="card-footer border-top d-flex">
                   <div class="my-auto ml-auto">
-                    <button class="btn btn-sm btn-white" @click="restartServer">
+                    <button class="btn btn-sm btn-white mx-1" @click="restartServer">
                       <i class="material-icons">refresh</i>
                       <span>Restart</span>
                     </button>
-                    <button class="btn btn-sm btn-danger" @click="stopServer">
+                    <button class="btn btn-sm btn-danger mx-1" @click="stopServer">
                       <i class="material-icons">block</i>
                       <span>Stop</span>
                     </button>
@@ -752,6 +761,44 @@
             </div>
           </div>
         </main>
+      </div>
+      <div class="row align-items-center justify-content-center h-100" v-show="!authenticated">
+        <div class="col-sm-10 col-md-8 col-lg-3">
+          <div class="card card-small mb-4">
+            <div class="card-header border-bottom text-center">
+              <div class="mb-3 mx-auto">
+                <img class="rounded-circle" src="/favicon.ico" alt="BDSX" width="110">
+              </div>
+              <h4 class="mb-0">BDSX</h4>
+              <span class="text-muted d-block mb-2">Web Panel</span>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item px-4">
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" placeholder="Username" spellcheck="false" data-ms-editor="true">
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <button class="btn btn-accent" @click="login">Login</button>
+                  </div>
+                  <div class="form-group mx-3 d-flex flex-column justify-content-center">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input" id="remember-me">
+                      <label class="custom-control-label" for="remember-me">Remember Me</label>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>

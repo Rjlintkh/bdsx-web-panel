@@ -3,6 +3,7 @@ const loading = "Loading...";
 const app = new Vue({
     el: "#app",
     data: {
+        authenticated: false,
         page: "Overview",
         data: {
             status: 0,
@@ -106,6 +107,9 @@ const app = new Vue({
                 modal.classList.add("show");
             }, 150);
         },
+        login: (ev, username = document.getElementById("username").value, password = document.getElementById("password").value) => {
+            socket.emit("Login", username, password);
+        },
         stopServer: () => {
             app.modal("Stop Server", "Are you sure you want to stop the server?", "Stop", "Cancel", confirm => {
                 if (confirm) {
@@ -171,78 +175,102 @@ const app = new Vue({
 });
 
 const socket = io();
-socket.on("SyncServerData", data => {
-    if (data.path.length === 0) {
-        app.data = data.value;
-    }
-    let obj = app.data;
-    while (data.path.length > 1) {
-        obj = obj[data.path.shift()];
-    }
-    if (data.delete) {
-        delete obj[data.path[0]];
-    } else {
-        obj[data.path[0]] = data.value;
-    }
-});
 
-const ramChart = new Chart(
-    document.getElementById("resource-usage-chart"),
-    {
-        type: "line",
-        data: {
-            labels: [],
-            datasets: [{
-                label: "RAM (%)",
-                pointRadius: 0,
-                backgroundColor: "rgba(255, 99, 132, 0.3)",
-                borderColor: "rgb(255, 99, 132)",
-                data: [],
-            },
-            {
-                label: "CPU (%)",
-                pointRadius: 0,
-                backgroundColor: "rgba(137, 209, 254, 0.3)",
-                borderColor: "rgb(137, 209, 254)",
-                data: [],
-            }]
-        },
-        options: {
-            hover: {
-                mode: "label"
-            },
-            scales: {
-                yAxes: [{
-                    display: true,
-                    ticks: {
-                        beginAtZero: true,
-                        steps: 10,
-                        stepValue: 5,
-                        max: 100
-                    }
-                }]
-            },
+if (localStorage.getItem("username") !== null && localStorage.getItem("password") !== null) {
+    app.login(null, localStorage.getItem("username"), localStorage.getItem("password"));
+}
+
+
+socket.on("Login", () => {
+    if (document.getElementById("remember-me").checked) {
+        localStorage.setItem("username", document.getElementById("username").value);
+        localStorage.setItem("password", document.getElementById("password").value);
+    }
+    app.authenticated = true;
+
+    socket.on("SyncServerData", data => {
+        if (data.path.length === 0) {
+            app.data = data.value;
         }
-    }
-);
+        let obj = app.data;
+        while (data.path.length > 1) {
+            obj = obj[data.path.shift()];
+        }
+        if (data.delete) {
+            delete obj[data.path[0]];
+        } else {
+            obj[data.path[0]] = data.value;
+        }
+    });
 
-socket.on("UpdateResourceUsage", () => {
-    ramChart.data.labels = app.data.process.usage.ram.map(e => new Date(e.time).toUTCString().slice(-12, -7));
-    ramChart.data.datasets[0].data = app.data.process.usage.ram.map(e => e.percent);
-    ramChart.data.datasets[1].data = app.data.process.usage.cpu.map(e => e.percent);
-    ramChart.update();
-});
-// socket.on("UpdateRequestedPlayerInventory", () => {
-//     if (app.data.selectedPlayer) {
-//         document.getElementById("inventory-render").innerHTML = "";
-//         const guiRender = new GuiRender(app.data.selectedPlayer.gameInfo.inv.options, document.getElementById("inventory-render"));
-//         guiRender.render(app.data.selectedPlayer.gameInfo.inv.content);
-//     }
-// });
-socket.on("StopRequestPlayerInfo", uuid => {
-    if (app.data.selectedPlayer?.uuid === uuid) {
-        app.data.selectedPlayer = undefined;
-    }
+    // socket.on("UpdateRequestedPlayerInventory", () => {
+    //     if (app.data.selectedPlayer) {
+    //         document.getElementById("inventory-render").innerHTML = "";
+    //         const guiRender = new GuiRender(app.data.selectedPlayer.gameInfo.inv.options, document.getElementById("inventory-render"));
+    //         guiRender.render(app.data.selectedPlayer.gameInfo.inv.content);
+    //     }
+    // });
+
+    socket.on("StopRequestPlayerInfo", uuid => {
+        if (app.data.selectedPlayer?.uuid === uuid) {
+            app.data.selectedPlayer = undefined;
+        }
+    });
+
+    window.addEventListener("beforeunload", () => {
+        if (app.data.selectedPlayer?.uuid) {
+            socket.emit("StopRequestPlayerInfo", player.uuid);
+        }
+     }, false);
+
+    setTimeout(() => {  
+        const ramChart = new Chart(
+            document.getElementById("resource-usage-chart"),
+            {
+                type: "line",
+                data: {
+                    labels: [1],
+                    datasets: [{
+                        label: "RAM (%)",
+                        pointRadius: 0,
+                        backgroundColor: "rgba(255, 99, 132, 0.3)",
+                        borderColor: "rgb(255, 99, 132)",
+                        data: [1],
+                    },
+                    {
+                        label: "CPU (%)",
+                        pointRadius: 0,
+                        backgroundColor: "rgba(137, 209, 254, 0.3)",
+                        borderColor: "rgb(137, 209, 254)",
+                        data: [1],
+                    }]
+                },
+                options: {
+                    hover: {
+                        mode: "label"
+                    },
+                    scales: {
+                        yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                                steps: 10,
+                                stepValue: 5,
+                                max: 100
+                            }
+                        }]
+                    },
+                }
+            }
+        );
+
+        socket.on("UpdateResourceUsage", () => {
+            ramChart.data.labels = app.data.process.usage.ram.map(e => new Date(e.time).toUTCString().slice(-12, -7));
+            ramChart.data.datasets[0].data = app.data.process.usage.ram.map(e => e.percent);
+            ramChart.data.datasets[1].data = app.data.process.usage.cpu.map(e => e.percent);
+            ramChart.update();
+        });
+    }, 100);
 });
 
 socket.on("Toast", (message, type = "secondary", timeout = 3000) => {
@@ -268,9 +296,3 @@ socket.on("disconnect", function () {
     app.data.status = 0;
     app.data.selectedPlayer = undefined;
 });
-
-window.addEventListener("beforeunload", () => {
-    if (app.data.selectedPlayer?.uuid) {
-        socket.emit("StopRequestPlayerInfo", player.uuid);
-    }
- }, false);

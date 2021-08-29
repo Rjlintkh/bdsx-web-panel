@@ -594,7 +594,7 @@
                   </div>
                   <div class="card-body p-0">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
-                      <li class="list-group-item d-flex px-3" v-for="(item) in data.server.onlinePlugins" @click="installPlugin(item.package.name)">
+                      <li class="list-group-item d-flex px-3" v-for="(item) in data.server.onlinePlugins">
                         <div>
                           <div class="text-muted">
                             <strong class="text-secondary" style="text-transform: capitalize;">{{ item.package.name.replace(/^@.+\//, "").replace(/-/g, " ") }}</strong> -

@@ -748,7 +748,7 @@
                 <div class="card card-small">
                   <div class="card-header border-bottom">
                     <h6 class="m-0 d-flex">
-                      <span>{{ objective.displayName }}</span>
+                      <span v-html="objective.displayName"></span>
                       <span class="text-muted">&nbsp;({{ name }})</span>
                       <i class="material-icons material-icons-outlined ml-auto mr-1 text-right">{{ objective.pinned }}</i>
                     </h6>
@@ -756,7 +756,7 @@
                   <div class="card-body p-0" style="height: 320px;">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
                       <li class="list-group-item border-bottom d-flex px-3" v-for="([id, score]) in Object.entries(objective.scores)">
-                        <span class="text-semibold text-fiord-blue">{{ score.name }}</span>
+                        <span class="text-semibold text-fiord-blue" v-html="score.name"></span>
                         <span class="ml-auto text-right text-semibold mc-c">{{ score.value }}</span>
                       </li>
                     </ul>

@@ -5,6 +5,7 @@ import pidusage = require("pidusage")
 import { NetworkIdentifier } from "bdsx/bds/networkidentifier";
 import { MinecraftPacketIds } from "bdsx/bds/packetids";
 import { TextPacket } from "bdsx/bds/packets";
+import { DisplaySlot } from "bdsx/bds/scoreboard";
 import { serverInstance } from "bdsx/bds/server";
 import { DeviceOS } from "bdsx/common";
 import { events } from "bdsx/event";
@@ -187,6 +188,7 @@ interface ServerData {
             players: Record<string, PlayerData>,
             objectives: Record<string, {
                 displayName: string,
+                pinned: string,
                 scores: Record<number, {
                     name: string,
                     value: number|string,
@@ -274,6 +276,7 @@ export const serverData = new DeepProxy(data, {
 let tps = 0;
 function refreshScoreboard() {
     const scoreboard = serverInstance.minecraft.getLevel().getScoreboard();
+    const pinned = [scoreboard.getDisplayObjective(DisplaySlot.BelowName), scoreboard.getDisplayObjective(DisplaySlot.List), scoreboard.getDisplayObjective(DisplaySlot.Sidebar)];
     const trackedIds = scoreboard.getTrackedIds();
     for (const objective of scoreboard.getObjectives()) {
         const scores: Record<number, {
@@ -290,9 +293,22 @@ function refreshScoreboard() {
             }
         }
         serverData.server.game.objectives[objective.name] = {
-            displayName: objective.displayName,
+            displayName: Utils.formatColorCodesToHTML(objective.displayName),
+            pinned: "",
             scores,
         };
+    }
+    const belowName = scoreboard.getDisplayObjective(DisplaySlot.BelowName);
+    if (belowName) {
+        serverData.server.game.objectives[belowName.objective!.name].pinned += "label";
+    }
+    const list = scoreboard.getDisplayObjective(DisplaySlot.List);
+    if (list) {
+        serverData.server.game.objectives[list.objective!.name].pinned += "format_list_numbered_rtl";
+    }
+    const sidebar = scoreboard.getDisplayObjective(DisplaySlot.Sidebar);
+    if (sidebar) {
+        serverData.server.game.objectives[sidebar.objective!.name].pinned += "push_pin";
     }
 }
 export const selectedPlayers = new Array<[string, NetworkIdentifier]>();
@@ -670,9 +686,10 @@ events.entityHealthChange.on(event => {
 //         }
 //     }
 // });
-events.objectiveCreate.on(event => {
-    serverData.server.game.objectives[event.name] = {
-        displayName: event.displayName,
+events.objectiveCreate.on(objective => {
+    serverData.server.game.objectives[objective.name] = {
+        displayName: Utils.formatColorCodesToHTML(objective.displayName),
+        pinned: "",
         scores: {},
     };
 });

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" id="main-stylesheet" data-version="1.1.0" href="styles/shards-dashboards.1.1.0.min.css">
     <link rel="stylesheet" href="styles/extras.1.1.0.min.css">
@@ -231,14 +231,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   </head>
-  <body class="h-100">
+  <body class="h-100" hidden>
     <div class="container-fluid h-100" id="app">
       <div class="row" v-show="authenticated">
         <!-- Main Sidebar -->
         <aside class="main-sidebar col-12 col-md-3 col-lg-2 px-0">
           <div class="main-navbar">
             <nav class="navbar align-items-stretch navbar-light bg-white flex-md-nowrap border-bottom p-0">
-              <a class="navbar-brand w-100 mr-0" href="#" style="line-height: 25px;">
+              <a class="navbar-brand w-100 mr-0" style="line-height: 25px;">
                 <div class="d-table m-auto">
                   <img id="main-logo" class="d-inline-block align-top mr-1" style="max-width: 25px;" src="/favicon.ico" alt="BDSX">
                   <span class="d-none d-md-inline ml-1">BDSX Web Panel</span>
@@ -283,7 +283,7 @@
               </li>
               <li class="nav-item">
                 <a class="nav-link " :class="(page === 'Scoreboard')?'active':''" @click="page = 'Scoreboard'">
-                  <i class="material-icons">format_list_numbered</i>
+                  <i class="material-icons">leaderboard</i>
                   <span>Scoreboard</span>
                 </a>
               </li>
@@ -364,12 +364,12 @@
                         </span>
                         <span class="d-flex mb-2">
                           <i class="material-icons mr-1">computer</i>
-                          <strong class="mr-1">Operating System:</strong>
+                          <strong class="mr-1">System:</strong>
                           <strong class="text-muted">{{ data.machine.os }}</strong>
                         </span>
                         <span class="d-flex mb-2">
                           <i class="material-icons mr-1">font_download</i>
-                          <strong class="mr-1">Machine Name:</strong>
+                          <strong class="mr-1">Machine:</strong>
                           <strong class="text-muted">{{ data.machine.name }}</strong>
                         </span>
                       </li>
@@ -747,13 +747,17 @@
               <div class="col-lg-3 col-md-4 col-sm-6 mb-4" v-for="([name, objective]) in Object.entries(data.server.game.objectives)">
                 <div class="card card-small">
                   <div class="card-header border-bottom">
-                    <h6 class="m-0">{{ objective.displayName }} <span class="text-muted">({{ name }})</span></h6>
+                    <h6 class="m-0 d-flex">
+                      <span>{{ objective.displayName }}</span>
+                      <span class="text-muted">&nbsp;({{ name }})</span>
+                      <i class="material-icons material-icons-outlined ml-auto mr-1 text-right">{{ objective.pinned }}</i>
+                    </h6>
                   </div>
                   <div class="card-body p-0" style="height: 320px;">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
                       <li class="list-group-item border-bottom d-flex px-3" v-for="([id, score]) in Object.entries(objective.scores)">
                         <span class="text-semibold text-fiord-blue">{{ score.name }}</span>
-                        <span class="ml-auto text-right text-semibold text-danger">{{ score.value }}</span>
+                        <span class="ml-auto text-right text-semibold mc-c">{{ score.value }}</span>
                       </li>
                     </ul>
                   </div>

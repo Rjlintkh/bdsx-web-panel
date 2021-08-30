@@ -180,7 +180,6 @@ if (localStorage.getItem("username") !== null && localStorage.getItem("password"
     app.login(null, localStorage.getItem("username"), localStorage.getItem("password"));
 }
 
-
 socket.on("Login", () => {
     if (document.getElementById("remember-me").checked) {
         localStorage.setItem("username", document.getElementById("username").value);
@@ -296,3 +295,5 @@ socket.on("disconnect", function () {
     app.data.status = 0;
     app.data.selectedPlayer = undefined;
 });
+
+document.body.hidden = false;

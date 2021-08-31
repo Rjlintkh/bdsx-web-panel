@@ -207,6 +207,7 @@ interface ServerData {
                     [name: string]: {
                         displayName: string,
                         type: GameRule.Type,
+                        enum?: string[],
                         value: any,
                     }
                 }
@@ -351,7 +352,8 @@ bedrockServer.afterOpen().then(() => {
         });
     }
     serverData.server.game.options["Game Rules"] = {};
-    const gameRules = serverInstance.minecraft.getLevel().getGameRules();
+    const level = serverInstance.minecraft.getLevel();
+    const gameRules = level.getGameRules();
     for (let i = 0; i < Object.keys(GameRuleId).length / 2; i++) {
         const rule = gameRules.getRule(i);
         serverData.server.game.options["Game Rules"][GameRuleId[i]] = {
@@ -360,6 +362,19 @@ bedrockServer.afterOpen().then(() => {
             value: rule.getValue(),
         }
     }
+    serverData.server.game.options["World"] = {
+        // "difficulty": {
+        //     displayName: "Difficulty",
+        //     type: GameRule.Type.Int,
+        //     enum: ["Peaceful", "Easy", "Normal", "Hard"],
+        //     value: serverInstance.minecraft.getLevel().getDifficulty(),
+        // },
+        "allow-cheats": {
+            displayName: "Allow Cheats",
+            type: GameRule.Type.Bool,
+            value: serverInstance.minecraft.getLevel().hasCommandsEnabled(),
+        }
+    };
     refreshScoreboard();
     Utils.fetchAllPlugins().then(plugins => {
         if (plugins !== null) {
@@ -676,6 +691,9 @@ fs.watchFile(path.join(process.cwd(), "permissions.json"), (curr, prev) => {
 });
 events.serverClose.on(() => {
     fs.unwatchFile(path.join(process.cwd(), "permissions.json"));
+});
+events.packetSend(MinecraftPacketIds.SetCommandsEnabled).on(pk => {
+    serverData.server.game.options["World"]["allow-cheats"].value = pk.commandsEnabled;
 });
 
 // Player Info

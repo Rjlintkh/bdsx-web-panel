@@ -552,7 +552,7 @@
                       <div class="card-body p-0" style="height: 320px;">
                         <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
                           <li class="list-group-item border-bottom d-flex justify-content-between px-3" v-for="(item) in data.server.game.permissions">
-                            <span class="text-semibold text-fiord-blue">{{ item.xuid }}</span>
+                            <span class="text-semibold text-secondary">{{ item.xuid }}</span>
                             <span class="text-right text-semibold text-reagent-gray text-capitalize">{{ item.permission }}</span>
                           </li>
                         </ul>
@@ -675,7 +675,7 @@
                   <div class="card-body p-0">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
                       <li class="list-group-item d-flex px-3" :class="{ 'bg-primary': data.selectedPlayer?.uuid === uuid }" style="cursor: pointer;" v-for="([uuid, player]) in Object.entries(data.server.game.players)" @click="selectPlayer(player)">
-                        <img class="me-1" :src="player.skin.head" width="20" height="20"></img>
+                        <img class="me-2" :src="player.skin.head" width="20" height="20"></img>
                         <strong :class="data.selectedPlayer?.uuid === uuid ? 'text-white' : 'text-secondary'">{{ player.name }}</strong>
                       </li>
                     </ul>

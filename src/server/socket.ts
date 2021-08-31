@@ -128,7 +128,21 @@ panel.io.on("connection", (socket: any) => {
                     const rule = gameRules.getRule(GameRuleId[name as unknown as number] as unknown as number);
                     rule.setValue(value, type);
                     serverInstance.minecraft.getLevel().syncGameRules();
+                    break;
+                case "World":
+                    const level = serverInstance.minecraft.getLevel();
+                    switch (name) {
+                    // case "difficulty":
+                    //     level.setDifficulty(value as number);
+                    //     break;
+                    case "allow-cheats":
+                        serverData.server.game.options["World"]["allow-cheats"].value = value as boolean;
+                        level.setCommandsEnabled(value as boolean);
+                        break;
+                    }
+                    break;
                 }
+
             });
         } else {
             socket.emit(SocketEvents.Toast, "Invalid username or password.", "danger");

@@ -2,6 +2,7 @@ import fs = require("fs");
 import path = require("path");
 import os = require("os");
 import pidusage = require("pidusage")
+import { GameRule, GameRuleId } from "bdsx/bds/gamerules";
 import { NetworkIdentifier } from "bdsx/bds/networkidentifier";
 import { MinecraftPacketIds } from "bdsx/bds/packetids";
 import { TextPacket } from "bdsx/bds/packets";
@@ -185,16 +186,31 @@ interface ServerData {
         },
         game: {
             tps: number,
-            players: Record<string, PlayerData>,
-            objectives: Record<string, {
-                displayName: string,
-                pinned: string,
-                scores: Record<number, {
-                    name: string,
-                    value: number|string,
-                }>,
-            }>,
+            players: {
+                [uuid: string]: PlayerData,
+            },
+            objectives: {
+                [name: string]: {
+                    displayName: string,
+                    pinned: string,
+                    scores: {
+                        [id: number]: {
+                            name: string,
+                            value: number|string,
+                        }
+                    }
+                }
+            },
             permissions: any,
+            options: {
+                [category: string]: {
+                    [name: string]: {
+                        displayName: string,
+                        type: GameRule.Type,
+                        value: any,
+                    }
+                }
+            }
         }
     },
 }
@@ -252,6 +268,7 @@ const data: ServerData = {
             players: {},
             objectives: {},
             permissions: require(path.join(process.cwd(), "permissions.json")),
+            options: {}
         }
     }
 };
@@ -276,7 +293,6 @@ export const serverData = new DeepProxy(data, {
 let tps = 0;
 function refreshScoreboard() {
     const scoreboard = serverInstance.minecraft.getLevel().getScoreboard();
-    const pinned = [scoreboard.getDisplayObjective(DisplaySlot.BelowName), scoreboard.getDisplayObjective(DisplaySlot.List), scoreboard.getDisplayObjective(DisplaySlot.Sidebar)];
     const trackedIds = scoreboard.getTrackedIds();
     for (const objective of scoreboard.getObjectives()) {
         const scores: Record<number, {
@@ -287,7 +303,7 @@ function refreshScoreboard() {
             const score = objective.getPlayerScore(scoreboardId);
             if (score.valid) {
                 scores[scoreboardId.idAsNumber] = {
-                    name: Utils.formatColorCodesToHTML(scoreboardId.identityDef.getName() ?? "") ?? "Player Offline",
+                    name: Utils.formatColorCodesToHTML(scoreboardId.identityDef.getName() ?? "Player Offline"),
                     value: score.value,
                 };
             }
@@ -313,6 +329,7 @@ function refreshScoreboard() {
 }
 export const selectedPlayers = new Array<[string, NetworkIdentifier]>();
 bedrockServer.afterOpen().then(() => {
+    panel.io.emit(SocketEvents.Logout);
     const startTime = new Date().getTime();
     serverData.status = 1;
     serverData.process.sessionId = bedrockServer.sessionId;
@@ -332,6 +349,16 @@ bedrockServer.afterOpen().then(() => {
                 license: plugin.json.license,
             }
         });
+    }
+    serverData.server.game.options["Game Rules"] = {};
+    const gameRules = serverInstance.minecraft.getLevel().getGameRules();
+    for (let i = 0; i < Object.keys(GameRuleId).length / 2; i++) {
+        const rule = gameRules.getRule(i);
+        serverData.server.game.options["Game Rules"][GameRuleId[i]] = {
+            displayName: Utils.mapGameRuleName(i),
+            type: rule.type,
+            value: rule.getValue(),
+        }
     }
     refreshScoreboard();
     Utils.fetchAllPlugins().then(plugins => {
@@ -703,7 +730,7 @@ events.scoreReset.on(event => {
 events.scoreSet.on(event => {
     if (serverData.server.game.objectives[event.objective.name]) {
         serverData.server.game.objectives[event.objective.name].scores[event.identityRef.scoreboardId.idAsNumber] = {
-            name: Utils.formatColorCodesToHTML(event.identityRef.scoreboardId.identityDef.getName() ?? "") ?? "Player Offline",
+            name: Utils.formatColorCodesToHTML(event.identityRef.scoreboardId.identityDef.getName() ?? "Player Offline"),
             value: event.score,
         };
     } else {
@@ -713,7 +740,7 @@ events.scoreSet.on(event => {
 events.scoreAdd.on(event => {
     if (serverData.server.game.objectives[event.objective.name]) {
         serverData.server.game.objectives[event.objective.name].scores[event.identityRef.scoreboardId.idAsNumber] = {
-            name: Utils.formatColorCodesToHTML(event.identityRef.scoreboardId.identityDef.getName() ?? "") ?? "Player Offline",
+            name: Utils.formatColorCodesToHTML(event.identityRef.scoreboardId.identityDef.getName() ?? "Player Offline"),
             value: event.objective.getPlayerScore(event.identityRef.scoreboardId).value + event.score,
         }
     } else {
@@ -723,7 +750,7 @@ events.scoreAdd.on(event => {
 events.scoreRemove.on(event => {
     if (serverData.server.game.objectives[event.objective.name]) {
         serverData.server.game.objectives[event.objective.name].scores[event.identityRef.scoreboardId.idAsNumber] = {
-            name: Utils.formatColorCodesToHTML(event.identityRef.scoreboardId.identityDef.getName() ?? "") ?? "Player Offline",
+            name: Utils.formatColorCodesToHTML(event.identityRef.scoreboardId.identityDef.getName() ?? "Player Offline"),
             value: event.objective.getPlayerScore(event.identityRef.scoreboardId).value - event.score,
         }
     } else {

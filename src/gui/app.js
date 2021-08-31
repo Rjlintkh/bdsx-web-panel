@@ -1,5 +1,7 @@
 const loading = "Loading...";
 
+const loginCache = {};
+
 const app = new Vue({
     el: "#app",
     data: {
@@ -56,7 +58,8 @@ const app = new Vue({
                 game: {
                     tps: 0,
                     players: {},
-                    objectives: {}
+                    objectives: {},
+                    options: {},
                 }
             }
         }
@@ -73,7 +76,7 @@ const app = new Vue({
             modal.tabIndex = "-1";
             modal.role = "dialog";
             modal.setAttribute("aria-hidden", "true");
-            modal.innerHTML = 
+            modal.innerHTML =
                 `<div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -108,6 +111,8 @@ const app = new Vue({
             }, 150);
         },
         login: (ev, username = document.getElementById("username").value, password = document.getElementById("password").value) => {
+            loginCache.username = username;
+            loginCache.password = password;
             socket.emit("Login", username, password);
         },
         stopServer: () => {
@@ -171,6 +176,9 @@ const app = new Vue({
         setScore: (sid, obj, score) => {
             socket.emit("SetScore", sid, obj, score);
         },
+        changeSetting: (category, name, value, type) => {
+            socket.emit("ChangeSetting", category, name, value, type);
+        }
     }
 });
 
@@ -179,6 +187,10 @@ const socket = io();
 if (localStorage.getItem("username") !== null && localStorage.getItem("password") !== null) {
     app.login(null, localStorage.getItem("username"), localStorage.getItem("password"));
 }
+
+socket.on("Logout", () => {
+    app.login(null, loginCache.username, loginCache.password);
+});
 
 socket.on("Login", () => {
     if (document.getElementById("remember-me").checked) {
@@ -222,7 +234,7 @@ socket.on("Login", () => {
         }
      }, false);
 
-    setTimeout(() => {  
+    setTimeout(() => {
         const ramChart = new Chart(
             document.getElementById("resource-usage-chart"),
             {

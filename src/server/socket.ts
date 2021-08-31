@@ -1,4 +1,5 @@
 import { AttributeId } from "bdsx/bds/attribute";
+import { GameRule, GameRuleId } from "bdsx/bds/gamerules";
 import { TextPacket } from "bdsx/bds/packets";
 import { serverInstance } from "bdsx/bds/server";
 import { events } from "bdsx/event";
@@ -29,7 +30,7 @@ panel.io.on("connection", (socket: any) => {
                 value: serverData,
             });
             socket.emit(SocketEvents.UpdateResourceUsage);
-        
+
             socket.on(SocketEvents.StopServer, () => {
                 socket.emit(SocketEvents.Toast, "Stopping server.");
                bedrockServer.stop();
@@ -118,6 +119,15 @@ panel.io.on("connection", (socket: any) => {
                         serverInstance.disconnectClient(ni, reason);
                     }
                     socket.emit(SocketEvents.Toast, `Kicked ${name}.`, "success");
+                }
+            });
+            socket.on(SocketEvents.ChangeSetting, (category: string, name: string, value: any, type: GameRule.Type) => {
+                switch (category) {
+                case "Game Rules":
+                    const gameRules = serverInstance.minecraft.getLevel().getGameRules();
+                    const rule = gameRules.getRule(GameRuleId[name as unknown as number] as unknown as number);
+                    rule.setValue(value, type);
+                    serverInstance.minecraft.getLevel().syncGameRules();
                 }
             });
         } else {

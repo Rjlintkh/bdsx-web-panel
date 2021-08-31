@@ -6,6 +6,7 @@ import { serverData } from "./data";
 export enum SocketEvents {
     // Login
     Login = "Login",
+    Logout = "Logout",
 
     // Data
     SyncServerData = "SyncServerData",
@@ -33,6 +34,7 @@ export enum SocketEvents {
     UpdateRequestedPlayerInventory = "UpdateRequestedPlayerInventory",
     KickPlayer = "KickPlayer",
     SetScore = "SetScore",
+    ChangeSetting = "ChangeSetting",
 }
 
 

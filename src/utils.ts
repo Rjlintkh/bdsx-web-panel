@@ -98,6 +98,44 @@ export namespace Utils {
         return name.replace(/^@.+\//, "").replace(/-/g, " ").replace(/\w\S*/g, m => m[0].toUpperCase() + m.substr(1).toLowerCase());
     }
 
+    // from enum GameRuleId
+    enum GameRuleNames {
+        "Command Block Output",
+        "Do Daylight Cycle",
+        "Entities Drop Loot",
+        "Fire Spreads",
+        "Mob Loot",
+        "Mob Spawning",
+        "Tile Drops",
+        "Weather Cycle",
+        "Drowning Damage",
+        "Fall Damage",
+        "Fire Damage",
+        "Keep Inventory",
+        "Mob Griefing",
+        "Friendly Fire",
+        "Show Coordinates",
+        "Natural Regeneration",
+        "TNT Explodes",
+        "Send Command Feedback",
+        "Max Command Chain",
+        "Insomnia",
+        "Command Blocks Enabled",
+        "Random Tick Speed",
+        "Immediate Respawn",
+        "Show Death Messages",
+        "Function Command Limit",
+        "Spawn Radius",
+        "Show Tags",
+        "Freeze Damage",
+    }
+
+    export function mapGameRuleName(id: number): string;
+    export function mapGameRuleName(name: string): number;
+    export function mapGameRuleName(id: number|string): number|string {
+        return GameRuleNames[id as number];
+    }
+
     export function parseProperties(properties: string): { [key: string]: string } {
         let retval: {[key: string]: string} = {};
         for (let line of properties.replace(/#.+|\r/g, "").split("\n")) {

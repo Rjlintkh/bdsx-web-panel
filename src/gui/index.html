@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp" rel="stylesheet">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" id="main-stylesheet" data-version="1.1.0" href="styles/shards-dashboards.1.1.0.min.css">
     <link rel="stylesheet" href="styles/extras.1.1.0.min.css">
     <script async defer src="https://buttons.github.io/buttons.js"></script>
@@ -13,6 +13,25 @@
     <style>
       ::-webkit-scrollbar {
         display: none;
+      }
+
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input[type=checkbox]:focus {
+        box-shadow:none !important;
+      }
+
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+
+      .nav-link, .toggle-sidebar {
+        cursor: pointer;
+        text-decoration: none !important;
       }
 
       .mc-0 {
@@ -181,6 +200,10 @@
           border-color: #b3d7ff;
         }
 
+        .form-switch input[type=checkbox]:not(:checked) {
+          background-color: #6c757d;
+        }
+
         .btn {
           background-color: transparent !important;
           color: #fff !important;
@@ -238,10 +261,10 @@
         <aside class="main-sidebar col-12 col-md-3 col-lg-2 px-0">
           <div class="main-navbar">
             <nav class="navbar align-items-stretch navbar-light bg-white flex-md-nowrap border-bottom p-0">
-              <a class="navbar-brand w-100 mr-0" style="line-height: 25px;">
+              <a class="navbar-brand w-100 me-0" style="line-height: 25px;">
                 <div class="d-table m-auto">
-                  <img id="main-logo" class="d-inline-block align-top mr-1" style="max-width: 25px;" src="/favicon.ico" alt="BDSX">
-                  <span class="d-none d-md-inline ml-1">BDSX Web Panel</span>
+                  <img id="main-logo" class="d-inline-block align-top me-1" style="max-width: 25px;" src="/favicon.ico" alt="BDSX">
+                  <span class="d-none d-md-inline ms-1">BDSX Web Panel</span>
                 </div>
               </a>
               <a class="toggle-sidebar d-sm-inline d-md-none d-lg-none">
@@ -287,6 +310,12 @@
                   <span>Scoreboard</span>
                 </a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link " :class="(page === 'Configuration')?'active':''" @click="page = 'Configuration'">
+                  <i class="material-icons">settings</i>
+                  <span>Configuration</span>
+                </a>
+              </li>
             </ul>
             <div class="col-12 position-absolute mh-20" style="bottom: 0;">
               <div class="card card-small card-post mb-3">
@@ -300,7 +329,7 @@
                   <p class="card-text text-muted text-truncate">{{ data.server.announcement.level }} - ({{ data.server.announcement.players.current }}/{{ data.server.announcement.players.max }})</p>
                 </div>
                 <div class="card-footer border-top d-flex">
-                  <div class="my-auto ml-auto">
+                  <div class="my-auto ms-auto">
                     <button class="btn btn-sm btn-white mx-1" @click="restartServer">
                       <i class="material-icons">refresh</i>
                       <span>Restart</span>
@@ -322,7 +351,7 @@
               <ul class="border-left flex-row mb-0">
                 <p class="m-auto">{{ page }}</p>
               </ul>
-              <a href="#" class="nav-link nav-link-icon toggle-sidebar d-sm-inline d-lg-none d-md-none text-center border-left" data-toggle="collapse" data-target=".header-navbar" aria-expanded="false" aria-controls="header-navbar">
+              <a class="nav-link nav-link-icon toggle-sidebar d-sm-inline d-lg-none d-md-none text-center border-left" data-toggle="collapse" data-target=".header-navbar" aria-expanded="false" aria-controls="header-navbar">
                 <i class="material-icons">&#xE5D2;</i>
               </a>
             </nav>
@@ -341,35 +370,35 @@
                   <div class='card-body p-0'>
                     <ul class="list-group list-group-flush">
                       <li class="list-group-item p-3">
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">flag</i>
-                          <strong class="mr-1">Status:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">flag</i>
+                          <strong class="me-1">Status:</strong>
                           <strong class="text-success" v-if="data.status">Online</strong>
                           <strong class="text-danger" v-if="!data.status">Offline</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">vpn_key</i>
-                          <strong class="mr-1">Process ID:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">vpn_key</i>
+                          <strong class="me-1">Process ID:</strong>
                           <strong class="text-muted">{{ data.process.pid }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">person</i>
-                          <strong class="mr-1">User:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">person</i>
+                          <strong class="me-1">User:</strong>
                           <strong class="text-muted">{{ data.process.user }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">folder</i>
-                          <strong class="mr-1">Directory:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">folder</i>
+                          <strong class="me-1">Directory:</strong>
                           <strong class="text-muted">{{ data.process.cwd }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">computer</i>
-                          <strong class="mr-1">System:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">settings</i>
+                          <strong class="me-1">System:</strong>
                           <strong class="text-muted">{{ data.machine.os }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">font_download</i>
-                          <strong class="mr-1">Machine:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">computer</i>
+                          <strong class="me-1">Machine:</strong>
                           <strong class="text-muted">{{ data.machine.name }}</strong>
                         </span>
                       </li>
@@ -388,29 +417,29 @@
                   <div class='card-body p-0'>
                     <ul class="list-group list-group-flush">
                       <li class="list-group-item p-3">
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">fingerprint</i>
-                          <strong class="mr-1">Session ID:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">fingerprint</i>
+                          <strong class="me-1">Session ID:</strong>
                           <strong class="text-muted">{{ data.process.sessionId }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">settings_input_antenna</i>
-                          <strong class="mr-1">Address:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">settings_input_antenna</i>
+                          <strong class="me-1">Address:</strong>
                           <strong class="text-muted">{{ data.machine.network.ip }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">settings_ethernet</i>
-                          <strong class="mr-1">Port:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">settings_ethernet</i>
+                          <strong class="me-1">Port:</strong>
                           <strong class="text-muted">{{ data.machine.network.port }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">timelapse</i>
-                          <strong class="mr-1">Uptime:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">timelapse</i>
+                          <strong class="me-1">Uptime:</strong>
                           <strong class="text-muted">{{ new Date(data.server.uptime).toUTCString().slice(-12, -4) }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">extension</i>
-                          <strong class="mr-1">Plugins:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">extension</i>
+                          <strong class="me-1">Plugins:</strong>
                           <strong class="text-muted">{{ data.server.plugins.length }}</strong>
                         </span>
                         <br>
@@ -430,29 +459,29 @@
                   <div class='card-body p-0'>
                     <ul class="list-group list-group-flush">
                       <li class="list-group-item p-3">
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">tag</i>
-                          <strong class="mr-1">Minecraft:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">tag</i>
+                          <strong class="me-1">Minecraft:</strong>
                           <strong class="text-muted">{{ data.server.version }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">fact_check</i>
-                          <strong class="mr-1">Protocol:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">fact_check</i>
+                          <strong class="me-1">Protocol:</strong>
                           <strong class="text-muted">{{ data.server.protocol }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">gavel</i>
-                          <strong class="mr-1">BDSX:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">gavel</i>
+                          <strong class="me-1">BDSX:</strong>
                           <strong class="text-muted">{{ data.server.bdsx }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">map</i>
-                          <strong class="mr-1">Level:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">map</i>
+                          <strong class="me-1">Level:</strong>
                           <strong class="text-muted">{{ data.server.info.level }}</strong>
                         </span>
-                        <span class="d-flex mb-2">
-                          <i class="material-icons mr-1">timer</i>
-                          <strong class="mr-1">TPS:</strong>
+                        <span class="d-flex mb-2 text-secondary">
+                          <i class="material-icons me-1">timer</i>
+                          <strong class="me-1">TPS:</strong>
                           <strong class="text-muted">{{ data.server.game.tps }}</strong>
                         </span>
                         <br>
@@ -522,9 +551,9 @@
                       </div>
                       <div class="card-body p-0" style="height: 320px;">
                         <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
-                          <li class="list-group-item border-bottom d-flex px-3" v-for="(item) in data.server.game.permissions">
+                          <li class="list-group-item border-bottom d-flex justify-content-between px-3" v-for="(item) in data.server.game.permissions">
                             <span class="text-semibold text-fiord-blue">{{ item.xuid }}</span>
-                            <span class="ml-auto text-right text-semibold text-reagent-gray text-capitalize">{{ item.permission }}</span>
+                            <span class="text-right text-semibold text-reagent-gray text-capitalize">{{ item.permission }}</span>
                           </li>
                         </ul>
                       </div>
@@ -646,7 +675,7 @@
                   <div class="card-body p-0">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
                       <li class="list-group-item d-flex px-3" :class="{ 'bg-primary': data.selectedPlayer?.uuid === uuid }" style="cursor: pointer;" v-for="([uuid, player]) in Object.entries(data.server.game.players)" @click="selectPlayer(player)">
-                        <img class="mr-1" :src="player.skin.head" width="20" height="20"></img>
+                        <img class="me-1" :src="player.skin.head" width="20" height="20"></img>
                         <strong :class="data.selectedPlayer?.uuid === uuid ? 'text-white' : 'text-secondary'">{{ player.name }}</strong>
                       </li>
                     </ul>
@@ -666,57 +695,57 @@
                       <li class="list-group-item d-flex px-3">
                         <div>
                           <div class="text-muted">
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">games</i>
-                              <strong class="mr-1">XUID:</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">games</i>
+                              <strong class="me-1">XUID:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.xuid }}</strong>
                             </span>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">fingerprint</i>
-                              <strong class="mr-1">UUID:</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">fingerprint</i>
+                              <strong class="me-1">UUID:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.uuid }}</strong>
                             </span>
                             <br>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">settings_input_antenna</i>
-                              <strong class="mr-1">Address:</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">settings_input_antenna</i>
+                              <strong class="me-1">Address:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.ip }}</strong>
                             </span>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">tag</i>
-                              <strong class="mr-1">Version:</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">tag</i>
+                              <strong class="me-1">Version:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.version }}</strong>
                             </span>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">language</i>
-                              <strong class="mr-1">Language:</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">language</i>
+                              <strong class="me-1">Language:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.lang }}</strong>
                             </span>
                             <br>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">perm_device_information</i>
-                              <strong class="mr-1">Device:</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">perm_device_information</i>
+                              <strong class="me-1">Device:</strong>
                               <strong class="text-primary">{{ data.selectedPlayer?.device.model || "Not specified" }}</strong>
                             </span>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">memory</i>
-                              <strong class="mr-1">Platform:</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">memory</i>
+                              <strong class="me-1">Platform:</strong>
                               <strong class="text-primary">{{ ["Not specified", "Android", "iOS", "macOS", "Amazon", "Gear VR", "Hololens", "Windows 10", "Win 32", "Dedicated", "tvOS", "PS 4", "Nintendo", "Xbox", "Windows Phone"][data.selectedPlayer?.device.type] }}</strong>
                             </span>
                             <br>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">location_on</i>
-                              <strong class="mr-1">Block</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">location_on</i>
+                              <strong class="me-1">Block</strong>
                               <strong class="text-info">{{ data.selectedPlayer?.gameInfo.pos.x.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.y.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.z.toFixed(3) }}</strong>
                             </span>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">screen_rotation</i>
-                              <strong class="mr-1">Facing</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">screen_rotation</i>
+                              <strong class="me-1">Facing</strong>
                               <strong class="text-info">{{ data.selectedPlayer?.gameInfo.rot.x.toFixed(2) }} {{ data.selectedPlayer?.gameInfo.rot.y.toFixed(2) }}</strong>
                             </span>
-                            <span class="d-flex mb-2">
-                              <i class="material-icons mr-1">local_hospital</i>
-                              <strong class="mr-1">Health</strong>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">local_hospital</i>
+                              <strong class="me-1">Health</strong>
                               <strong class="text-info">{{ data.selectedPlayer?.gameInfo.health.current }}/{{ data.selectedPlayer?.gameInfo.health.max }}</strong>
                             </span>
                             <br>
@@ -747,17 +776,58 @@
               <div class="col-lg-3 col-md-4 col-sm-6 mb-4" v-for="([name, objective]) in Object.entries(data.server.game.objectives)">
                 <div class="card card-small">
                   <div class="card-header border-bottom">
-                    <h6 class="m-0 d-flex">
-                      <span v-html="objective.displayName"></span>
-                      <span class="text-muted">&nbsp;({{ name }})</span>
-                      <i class="material-icons material-icons-outlined ml-auto mr-1 text-right">{{ objective.pinned }}</i>
+                    <h6 class="m-0 d-flex justify-content-between">
+                      <span>
+                        <span v-html="objective.displayName"></span>
+                        <span class="text-muted">({{ name }})</span>
+                      </span>
+                      <i class="material-icons material-icons-outlined me-1 text-right">{{ objective.pinned }}</i>
                     </h6>
                   </div>
                   <div class="card-body p-0" style="height: 320px;">
                     <ul class="list-group list-group-small list-group-flush overflow-auto h-100">
-                      <li class="list-group-item border-bottom d-flex px-3" v-for="([id, score]) in Object.entries(objective.scores)">
-                        <span class="text-semibold text-fiord-blue" v-html="score.name"></span>
-                        <span class="ml-auto text-right text-semibold mc-c">{{ score.value }}</span>
+                      <li class="list-group-item border-bottom d-flex justify-content-between px-3" v-for="([id, score]) in Object.entries(objective.scores)">
+                        <span class="text-semibold text-secondary" v-html="score.name"></span>
+                        <span class="text-right text-semibold mc-c">{{ score.value }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="card-footer border-top">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="main-content-container container-fluid px-4" v-show="page === 'Configuration'">
+            <!-- Page Header -->
+            <div class="page-header row no-gutters py-3">
+            </div>
+            <div class="row mb-4">
+                <!-- Objectives -->
+              <div class="col-lg-3 col-md-6 col-sm-12 mb-4" v-for="([category, options]) in Object.entries(data.server.game.options)">
+                <div class="card card-small">
+                  <div class="card-header border-bottom">
+                    <h6 class="m-0 d-flex">
+                      <span>{{ category }}</span>
+                    </h6>
+                  </div>
+                  <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item p-3">
+                        <div class="row px-0" v-for="([name, option]) in Object.entries(options)">
+                          <div class="form-check form-switch mb-1 d-flex flex-row justify-content-between" v-if="option.type === 1">
+                            <label :for="`gamerule-${name}`" style="cursor: pointer;"><strong class="text-secondary">{{ option.displayName }}</strong></label>
+                            <input class="form-check-input" type="checkbox" :id="`gamerule-${name}`" :checked="option.value" @change="changeSetting(category, name, event.target.checked, 1)">
+                          </div>
+                          <div class="input-group mb-1 d-flex flex-row justify-content-between" v-if="option.type === 2">
+                            <label class="ms-2" :for="`gamerule-${name}`" style="cursor: pointer; height: 20px;"><strong class="text-secondary">{{ option.displayName }}</strong></label>
+                            <input type="number" pattern="[0-9]" class="form-control flex-grow-0" :id="`gamerule-${name}`" style="height: 20px; width: 46px; padding: 5px; text-align: right;" :value="option.value" @change="changeSetting(category, name, parseInt(event.target.value), 2)">
+                          </div>
+                          <div class="input-group mb-1 d-flex flex-row justify-content-between" v-if="option.type === 3">
+                            <label class="ms-2" :for="`gamerule-${name}`" style="cursor: pointer; height: 20px;"><strong class="text-secondary">{{ option.displayName }}</strong></label>
+                            <input type="number" pattern="[0-9.]" class="form-control flex-grow-0" :id="`gamerule-${name}`" style="height: 20px; width: 46px; padding: 5px; text-align: right;" :value="option.value" @change="changeSetting(category, name, parseFloat(event.target.value), 3)">
+                          </div>
+                        </div>
                       </li>
                     </ul>
                   </div>
@@ -811,12 +881,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/94/three.min.js" integrity="sha256-NGC9JEuTWN4GhTj091wctgjzftr+8WNDmw0H8J5YPYE=" crossorigin="anonymous"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.0/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-    <script src="https://unpkg.com/shards-ui@latest/dist/js/shards.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sharrre/2.0.1/jquery.sharrre.min.js"></script>
-    <script src="scripts/extras.1.1.0.min.js"></script>
-    <script src="scripts/shards-dashboards.1.1.0.min.js"></script>
+    <script async defer src="https://unpkg.com/shards-ui@latest/dist/js/shards.min.js"></script>
+    <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/Sharrre/2.0.1/jquery.sharrre.min.js"></script>
+    <script async defer src="scripts/extras.1.1.0.min.js"></script>
+    <script async defer src="scripts/shards-dashboards.1.1.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <!-- <script src="https://cdn.jsdelivr.net/gh/InventivetalentDev/MineRender@1.4.6/dist/gui.min.js"></script> -->
     <script src="/socket.io/socket.io.js"></script>

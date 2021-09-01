@@ -11,10 +11,12 @@ import { selectedPlayers, serverData } from "./data";
 import { panel, SocketEvents } from "./server";
 
 panel.io.on("connection", (socket: any) => {
-    socket.on(SocketEvents.Login, (username: string, password: string) => {
+    socket.on(SocketEvents.Login, (username: string, password: string, silent?: boolean) => {
         if (username === panel.config.account.username && password === panel.config.account.password) {
             socket.emit(SocketEvents.Login);
-            socket.emit(SocketEvents.Toast, "Logged in successfully.", "success");
+            if (!silent) {
+                socket.emit(SocketEvents.Toast, "Logged in successfully.", "success");
+            }
             Utils.fetchAllPlugins().then(plugins => {
                 if (plugins !== null) {
                     serverData.server.onlinePlugins = [];

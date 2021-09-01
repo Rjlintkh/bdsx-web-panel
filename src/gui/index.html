@@ -173,12 +173,36 @@
           background-color: rgba(255,255,255,.03);
         }
 
-        .card-body {
+        .card-body, .modal-body {
           color: #e9ecef;
         }
 
         .card-footer {
           background-color: rgba(255,255,255,.03);
+        }
+
+        .modal-content {
+          background: #272B30;
+          border-radius: .625rem;
+          border: 1px solid rgba(255,255,255,.125);
+        }
+
+        .modal-header {
+          background-color: #2E3236;
+          border-bottom: 1px solid #343a40;
+          border-top-left-radius: calc(.3rem - 1px);
+          border-top-right-radius: calc(.3rem - 1px);
+        }
+
+        .modal-footer {
+          background-color: #2E3236;
+          border-top: 1px solid #343a40;
+          border-bottom-right-radius: calc(.3rem - 1px);
+          border-bottom-left-radius: calc(.3rem - 1px);
+        }
+
+        .modal-backdrop.show {
+          opacity: .88;
         }
 
         .list-group-item {
@@ -220,7 +244,9 @@
         }
 
         .navbar-light .navbar-brand {
-          color: #868e96;
+          color: #868e96 !important;
+          text-decoration: none !important;
+          cursor: default;
         }
 
         .main-sidebar .nav .nav-item .nav-link {
@@ -250,6 +276,8 @@
         }
       }
     </style>
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark@1.0.0/dist/css/bootstrap-dark.min.css" /> -->
+
     <link rel="apple-touch-icon" href="/favicon.ico" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -317,27 +345,29 @@
                 </a>
               </li>
             </ul>
-            <div class="col-12 position-absolute mh-20" style="bottom: 0;">
-              <div class="card card-small card-post mb-3">
-                <div class="card-body">
-                  <h6 class="card-title text-truncate">
-                    <i class="material-icons text-success" v-if="data.status">check_circle_outline</i>
-                    <i class="material-icons text-danger" v-if="!data.status">remove_circle_outline</i>
-                    <span>{{ data.server.info.name }}</span>
-                  </h6>
-                  <i class="card-text text-muted text-truncate">{{ data.server.announcement.name }} - v{{ data.server.version }}</i>
-                  <p class="card-text text-muted text-truncate">{{ data.server.announcement.level }} - ({{ data.server.announcement.players.current }}/{{ data.server.announcement.players.max }})</p>
-                </div>
-                <div class="card-footer border-top d-flex">
-                  <div class="my-auto ms-auto">
-                    <button class="btn btn-sm btn-white mx-1" @click="restartServer">
-                      <i class="material-icons">refresh</i>
-                      <span>Restart</span>
-                    </button>
-                    <button class="btn btn-sm btn-danger mx-1" @click="stopServer">
-                      <i class="material-icons">block</i>
-                      <span>Stop</span>
-                    </button>
+            <div class="row">
+              <div class="col-12 fixed-bottom">
+                <div class="card card-small card-post mb-3">
+                  <div class="card-body">
+                    <h6 class="card-title text-truncate">
+                      <i class="material-icons text-success" v-if="data.status">check_circle_outline</i>
+                      <i class="material-icons text-danger" v-if="!data.status">remove_circle_outline</i>
+                      <span>{{ data.server.info.name }}</span>
+                    </h6>
+                    <i class="card-text text-muted text-truncate">{{ data.server.announcement.name }} - v{{ data.server.version }}</i>
+                    <p class="card-text text-muted text-truncate">{{ data.server.announcement.level }} - ({{ data.server.announcement.players.current }}/{{ data.server.announcement.players.max }})</p>
+                  </div>
+                  <div class="card-footer border-top d-flex">
+                    <div class="my-auto ms-auto">
+                      <button class="btn btn-sm btn-white mx-1" @click="restartServer">
+                        <i class="material-icons">refresh</i>
+                        <span>Restart</span>
+                      </button>
+                      <button class="btn btn-sm btn-danger mx-1" @click="stopServer">
+                        <i class="material-icons">block</i>
+                        <span>Stop</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -349,7 +379,7 @@
             <!-- Main Navbar -->
             <nav class="navbar align-items-stretch navbar-light flex-md-nowrap p-0">
               <ul class="border-left flex-row mb-0">
-                <p class="m-auto">{{ page }}</p>
+                <h6 class="m-auto">{{ page }}</h6>
               </ul>
               <a class="nav-link nav-link-icon toggle-sidebar d-sm-inline d-lg-none d-md-none text-center border-left" data-toggle="collapse" data-target=".header-navbar" aria-expanded="false" aria-controls="header-navbar">
                 <i class="material-icons">&#xE5D2;</i>
@@ -863,7 +893,7 @@
                 </div>
                 <div class="form-row">
                   <div class="form-group">
-                    <button class="btn btn-accent" @click="login">Login</button>
+                    <button class="btn btn-accent" @click="login()">Login</button>
                   </div>
                   <div class="form-group mx-3 d-flex flex-column justify-content-center">
                     <div class="custom-control custom-checkbox">

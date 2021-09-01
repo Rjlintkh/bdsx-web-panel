@@ -80,8 +80,8 @@ const app = new Vue({
                 `<div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLongTitle">${title}</h5>
-                            <button type="button" class="close" data-dismiss aria-label="Close">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="close bg-transparent border-0" data-dismiss aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -110,10 +110,10 @@ const app = new Vue({
                 modal.classList.add("show");
             }, 150);
         },
-        login: (ev, username = document.getElementById("username").value, password = document.getElementById("password").value) => {
+        login: (username = document.getElementById("username").value, password = document.getElementById("password").value, silent) => {
             loginCache.username = username;
             loginCache.password = password;
-            socket.emit("Login", username, password);
+            socket.emit("Login", username, password, silent);
         },
         stopServer: () => {
             app.modal("Stop Server", "Are you sure you want to stop the server?", "Stop", "Cancel", confirm => {
@@ -185,11 +185,11 @@ const app = new Vue({
 const socket = io();
 
 if (localStorage.getItem("username") !== null && localStorage.getItem("password") !== null) {
-    app.login(null, localStorage.getItem("username"), localStorage.getItem("password"));
+    app.login(localStorage.getItem("username"), localStorage.getItem("password"));
 }
 
 socket.on("Logout", () => {
-    app.login(null, loginCache.username, loginCache.password);
+    app.login(loginCache.username, loginCache.password, true);
 });
 
 socket.on("Login", () => {

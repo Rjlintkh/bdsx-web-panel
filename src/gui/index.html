@@ -870,7 +870,7 @@
         </main>
       </div>
       <div class="row align-items-center justify-content-center h-100" v-show="!authenticated">
-        <div class="col-sm-10 col-md-8 col-lg-3">
+        <div class="col-sm-10 col-md-8 col-lg-4">
           <div class="card card-small mb-4">
             <div class="card-header border-bottom text-center">
               <div class="mb-3 mx-auto">
@@ -881,22 +881,20 @@
             </div>
             <ul class="list-group list-group-flush">
               <li class="list-group-item px-4">
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="username">Username</label>
+                <div class="row form-row">
+                  <div class="form-group col-md-6 col-sm-12">
                     <input type="text" class="form-control" id="username" placeholder="Username" spellcheck="false" data-ms-editor="true">
                   </div>
-                  <div class="form-group col-md-6">
-                    <label for="password">Password</label>
+                  <div class="form-group col-md-6 col-sm-12">
                     <input type="password" class="form-control" id="password" placeholder="Password">
                   </div>
                 </div>
-                <div class="form-row">
-                  <div class="form-group">
+                <div class="row form-row">
+                  <div class="form-group w-auto">
                     <button class="btn btn-accent" @click="login()">Login</button>
                   </div>
-                  <div class="form-group mx-3 d-flex flex-column justify-content-center">
-                    <div class="custom-control custom-checkbox">
+                  <div class="form-group col d-flex flex-column justify-content-center">
+                    <div class="custom-control custom-checkbox p-0">
                       <input type="checkbox" class="custom-control-input" id="remember-me">
                       <label class="custom-control-label" for="remember-me">Remember Me</label>
                     </div>

@@ -130,6 +130,15 @@
         font-weight: 500;
         text-decoration: none;
       }
+      
+      .list-group-item {
+        margin-bottom: 0;
+      }
+
+      .list-group-item:last-child {
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+      }
 
       @media (prefers-color-scheme: dark) {
         .mc-f {
@@ -768,6 +777,11 @@
                               <strong class="me-1">Block</strong>
                               <strong class="text-info">{{ data.selectedPlayer?.gameInfo.pos.x.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.y.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.z.toFixed(3) }}</strong>
                             </span>
+                            <!-- <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">location_on</i>
+                              <strong class="me-1">Spawn</strong>
+                              <strong class="text-info">{{ data.selectedPlayer?.gameInfo.pos.x.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.y.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.z.toFixed(3) }}</strong>
+                            </span> -->
                             <span class="d-flex mb-2 text-secondary">
                               <i class="material-icons me-1">screen_rotation</i>
                               <strong class="me-1">Facing</strong>
@@ -786,6 +800,18 @@
                                 <span class="text-danger">
                                   <i class="material-icons">person_remove</i>
                                 </span> Kick </button>
+                              <!-- <button type="button" class="btn btn-white" @click="kickPlayer(data.selectedPlayer?.uuid)">
+                                <span class="text-danger">
+                                  <i class="material-icons">person_remove</i>
+                                </span> Ban </button> -->
+                              <!-- <button type="button" class="btn btn-white" @click="kickPlayer(data.selectedPlayer?.uuid)">
+                                <span class="text-danger">
+                                  <i class="material-icons">person_remove</i>
+                                </span> Teleport </button> -->
+                              <!-- <button type="button" class="btn btn-white" @click="kickPlayer(data.selectedPlayer?.uuid)">
+                                <span class="text-danger">
+                                  <i class="material-icons">person_remove</i>
+                                </span> Message </button> -->
                           </div>
                         </div>
                       </li>

@@ -546,7 +546,7 @@
             </div>
             <div class="row">
               <!-- Resource Usage -->
-              <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+              <div class="col-lg-9 col-md-12 col-sm-12 mb-3">
                 <div class="card card-small">
                   <div class="card-header border-bottom">
                     <h6 class="m-0">Resource Usage</h6>
@@ -745,6 +745,11 @@
                               <strong class="text-primary">{{ data.selectedPlayer?.uuid }}</strong>
                             </span>
                             <br>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">timer</i>
+                              <strong class="me-1">Ping:</strong>
+                              <strong class="text-primary">{{ data.selectedPlayer?.gameInfo.ping }}</strong>
+                            </span>
                             <span class="d-flex mb-2 text-secondary">
                               <i class="material-icons me-1">settings_input_antenna</i>
                               <strong class="me-1">Address:</strong>

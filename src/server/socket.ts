@@ -92,6 +92,7 @@ panel.io.on("connection", (socket: any) => {
                 if (player?.isPlayer()) {
                     selectedPlayers.push([uuid, ni!]);
                     serverData.server.game.players[uuid].gameInfo = {
+                        ping: -1,
                         pos: player.getPosition().toJSON(),
                         rot: player.getRotation().toJSON(),
                         lvl: player.getAttribute(AttributeId.PlayerLevel),

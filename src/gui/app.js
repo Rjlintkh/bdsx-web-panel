@@ -303,7 +303,7 @@ socket.on("Toast", (message, type = "secondary", timeout = 3000) => {
     }, timeout);
 });
 
-socket.on("disconnect", function () {
+socket.on("disconnect", () => {
     app.data.status = 0;
     app.data.selectedPlayer = undefined;
 });

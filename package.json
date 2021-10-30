@@ -1,6 +1,6 @@
 {
   "name": "@bdsx/web-panel",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A web admin panel for BDSX",
   "main": "index.js",
   "keywords": [],

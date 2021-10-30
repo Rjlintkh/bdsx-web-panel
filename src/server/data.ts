@@ -2,6 +2,7 @@ import fs = require("fs");
 import path = require("path");
 import os = require("os");
 import pidusage = require("pidusage")
+import { BlockPos, ChunkBlockPos } from "bdsx/bds/blockpos";
 import { GameRule, GameRuleId } from "bdsx/bds/gamerules";
 import { NetworkIdentifier } from "bdsx/bds/networkidentifier";
 import { MinecraftPacketIds } from "bdsx/bds/packetids";
@@ -107,6 +108,7 @@ interface PlayerData {
             x: number,
             y: number,
         },
+        biome: string,
         lvl: number,
         health: {
             current: number,
@@ -303,7 +305,7 @@ function refreshScoreboard() {
         }> = {};
         for (const scoreboardId of trackedIds) {
             const score = objective.getPlayerScore(scoreboardId);
-            if (score.valid) {
+            if (score.valid && scoreboardId.identityDef) {
                 scores[scoreboardId.idAsNumber] = {
                     name: Utils.formatColorCodesToHTML(scoreboardId.identityDef.getName() ?? "Player Offline"),
                     value: score.value,
@@ -330,6 +332,7 @@ function refreshScoreboard() {
     }
 }
 export const selectedPlayers = new Array<[string, NetworkIdentifier]>();
+let pidusageErr = false;
 bedrockServer.afterOpen().then(() => {
     panel.io.emit(SocketEvents.Logout);
     const startTime = new Date().getTime();
@@ -398,14 +401,25 @@ bedrockServer.afterOpen().then(() => {
         }
         const time = new Date().getTime();
         pidusage(process.pid, (err, stats) => {
-            serverData.process.usage.ram.push({
-                percent: stats.memory * 100 / os.totalmem(),
-                time,
-            });
-            serverData.process.usage.cpu.push({
-                percent: stats.cpu,
-                time,
-            });
+            if (stats) {
+                if (pidusageErr) {
+                    panel.log(`Memory and CPU usage charts will be enabled again.`.yellow);
+                    pidusageErr = false;
+                }
+                serverData.process.usage.ram.push({
+                    percent: stats.memory * 100 / os.totalmem(),
+                    time,
+                });
+                serverData.process.usage.cpu.push({
+                    percent: stats.cpu,
+                    time,
+                });
+            } else {
+                if (err && !pidusageErr) {
+                    panel.log(`An error encountered: 'wmic' is missing, try adding '%SystemRoot%\\System32\\Wbem' to PATH. Memory and CPU usage charts will be disabled.`.yellow);
+                    pidusageErr = true;
+                }
+            }
             panel.io.emit(SocketEvents.UpdateResourceUsage);
         });
         return _;
@@ -473,60 +487,68 @@ events.packetAfter(MinecraftPacketIds.Login).on(async (pk, ni) => {
             serverData.server.game.players[uuid].lang = languageNames.find(l => l[0] === data.LanguageCode)?.[1] ?? data.LanguageCode;
         } catch { }
 
-        const geometryName = JSON.parse(Buffer.from(data.SkinResourcePatch, "base64").toString())["geometry"]["default"];
-        const geometryData = JSON.parse(Buffer.from(data.SkinGeometryData, "base64").toString());
+        try {
+            const geometryName = JSON.parse(Buffer.from(data.SkinResourcePatch, "base64").toString())["geometry"]["default"];
+            const geometryData = JSON.parse(Buffer.from(data.SkinGeometryData, "base64").toString());
 
-        const faceTextureOffset: [number, number] = [8, 8];
-        const faceTextureSize: [number, number] = [8, 8];
+            const faceTextureOffset: [number, number] = [8, 8];
+            const faceTextureSize: [number, number] = [8, 8];
 
-        let fromAnimatedData = false;
+            let fromAnimatedData = false;
 
-        if (geometryData === null) {
-            // HD skins
-            if (data.SkinImageHeight === 128) {
-                faceTextureOffset[0] = 16;
-                faceTextureOffset[1] = 16;
-
-                faceTextureSize[0] = 16;
-                faceTextureSize[1] = 16;
-            }
-        } else {
-            let geometry: {bones: any[]};
-
-            // Format version 1.12.0
-            if ("minecraft:geometry" in geometryData) {
-                const geometries = geometryData["minecraft:geometry"];
-                if (Array.isArray(geometries)) {
-                    geometry = geometryData["minecraft:geometry"].find((g: any) => g.description.identifier === geometryName);
+            if (geometryData === null) {
+                // HD skins
+                if (data.SkinImageHeight === 128) {
+                    faceTextureOffset[0] = 16;
+                    faceTextureOffset[1] = 16;
+    
+                    faceTextureSize[0] = 16;
+                    faceTextureSize[1] = 16;
+                }
+            } else {
+                let geometry: {bones: any[]};
+    
+                // Format version 1.12.0
+                if ("minecraft:geometry" in geometryData) {
+                    const geometries = geometryData["minecraft:geometry"];
+                    if (Array.isArray(geometries)) {
+                        geometry = geometryData["minecraft:geometry"].find((g: any) => g.description.identifier === geometryName);
+                    } else {
+                    geometry = geometryData["minecraft:geometry"][geometries];
+                    }
+                }
+                // Fomrat version 1.8.0
+                else {
+                    geometry = geometryData[geometryName];
+                }
+    
+                const headModel = geometry.bones.find(b => b.name === "head");
+    
+                if (headModel.cubes?.[0]?.uv) {
+                    const uv = headModel.cubes[0].uv;
+                    const size = headModel.cubes[0].size;
+    
+                    faceTextureOffset[0] = uv[0] + size[0];
+                    faceTextureOffset[1] = uv[1] + size[1];
+    
+                    faceTextureSize[0] = size[0];
+                    faceTextureSize[1] = size[1];
                 } else {
-                geometry = geometryData["minecraft:geometry"][geometries];
+                    fromAnimatedData = true;
                 }
             }
-            // Fomrat version 1.8.0
-            else {
-                geometry = geometryData[geometryName];
-            }
-
-            const headModel = geometry.bones.find(b => b.name === "head");
-
-            if (headModel.cubes?.[0]?.uv) {
-                const uv = headModel.cubes[0].uv;
-                const size = headModel.cubes[0].size;
-
-                faceTextureOffset[0] = uv[0] + size[0];
-                faceTextureOffset[1] = uv[1] + size[1];
-
-                faceTextureSize[0] = size[0];
-                faceTextureSize[1] = size[1];
+    
+            if (fromAnimatedData) {
+                if (data.AnimatedImageData[0]) {
+                    serverData.server.game.players[uuid].skin.head = await Utils.readSkinBuffer(Buffer.from(data.AnimatedImageData[0].Image, "base64"), data.AnimatedImageData[0].ImageWidth, data.AnimatedImageData[0].ImageHeight, faceTextureOffset, faceTextureSize);
+                } else {
+                    panel.log(`Failed to parse ${cert["extraData"]["displayName"]}'s skin image. It will not be seen in the Players panel.`.yellow);
+                }
             } else {
-                fromAnimatedData = true;
+                serverData.server.game.players[uuid].skin.head = await Utils.readSkinBuffer(Buffer.from(data.SkinData, "base64"), data.SkinImageWidth, data.SkinImageHeight, faceTextureOffset, faceTextureSize);
             }
-        }
-
-        if (fromAnimatedData) {
-            serverData.server.game.players[uuid].skin.head = await Utils.readSkinBuffer(Buffer.from(data.AnimatedImageData[0].Image, "base64"), data.AnimatedImageData[0].ImageWidth, data.AnimatedImageData[0].ImageHeight, faceTextureOffset, faceTextureSize);
-        } else {
-            serverData.server.game.players[uuid].skin.head = await Utils.readSkinBuffer(Buffer.from(data.SkinData, "base64"), data.SkinImageWidth, data.SkinImageHeight, faceTextureOffset, faceTextureSize);
+        } catch {
+            panel.log(`Failed to parse ${cert["extraData"]["displayName"]}'s skin data. It will not be seen in the Players panel.`.yellow);
         }
 
         Utils.players.set(uuid, ni);
@@ -715,12 +737,17 @@ events.packetSend(MinecraftPacketIds.SetCommandsEnabled).on(pk => {
 events.packetAfter(MinecraftPacketIds.PlayerAuthInput).on((pk, ni) => {
     for (const [uuid, _ni] of selectedPlayers) {
         if (_ni.equals(ni)) {
-            serverData.server.game.players[uuid].gameInfo!.pos.x = pk.pos.x;
-            serverData.server.game.players[uuid].gameInfo!.pos.y = pk.pos.y;
-            serverData.server.game.players[uuid].gameInfo!.pos.z = pk.pos.z;
-            serverData.server.game.players[uuid].gameInfo!.rot.x = pk.pitch;
-            serverData.server.game.players[uuid].gameInfo!.rot.y = pk.yaw;
-            serverData.server.game.players[uuid].gameInfo!.ping = serverInstance.networkHandler.instance.peer.GetLastPing(ni.address);
+            const data = serverData.server.game.players[uuid];
+            const blockPos = BlockPos.create(pk.pos.x, pk.pos.y, pk.pos.z);
+            data.gameInfo!.pos.x = pk.pos.x;
+            data.gameInfo!.pos.y = pk.pos.y;
+            data.gameInfo!.pos.z = pk.pos.z;
+            data.gameInfo!.rot.x = pk.pitch;
+            data.gameInfo!.rot.y = pk.yaw;
+            data.gameInfo!.biome = ni.getActor()!.getRegion().getChunkAt(blockPos).getBiome(ChunkBlockPos.create(blockPos)).name;
+            data.gameInfo!.ping = data.ip === "127.0.0.1" ?
+                serverInstance.networkHandler.instance.peer.GetLastPing(ni.address) - 30 :
+                serverInstance.networkHandler.instance.peer.GetLastPing(ni.address);
             break;
         }
     }
@@ -730,8 +757,9 @@ events.entityHealthChange.on(event => {
         const ni = event.entity.getNetworkIdentifier();
         for (const [uuid, _ni] of selectedPlayers) {
             if (_ni.equals(ni)) {
-                serverData.server.game.players[uuid].gameInfo!.health.current = event.newHealth;
-                serverData.server.game.players[uuid].gameInfo!.health.max = event.entity.getMaxHealth();
+                const data = serverData.server.game.players[uuid];
+                data.gameInfo!.health.current = event.newHealth;
+                data.gameInfo!.health.max = event.entity.getMaxHealth();
                 break;
             }
         }

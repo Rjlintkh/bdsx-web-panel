@@ -130,7 +130,7 @@
         font-weight: 500;
         text-decoration: none;
       }
-      
+
       .list-group-item {
         margin-bottom: 0;
       }
@@ -236,7 +236,7 @@
         .form-switch input[type=checkbox]:not(:checked), .form-check input[type=checkbox]:not(:checked) {
           background-color: #6c757d;
         }
-        
+
         .btn {
           background-color: transparent !important;
           color: #fff !important;
@@ -287,7 +287,7 @@
     </style>
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark@1.0.0/dist/css/bootstrap-dark.min.css" /> -->
 
-    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   </head>
@@ -779,7 +779,7 @@
                             <br>
                             <span class="d-flex mb-2 text-secondary">
                               <i class="material-icons me-1">location_on</i>
-                              <strong class="me-1">Block</strong>
+                              <strong class="me-1">Position</strong>
                               <strong class="text-info">{{ data.selectedPlayer?.gameInfo.pos.x.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.y.toFixed(3) }} {{ data.selectedPlayer?.gameInfo.pos.z.toFixed(3) }}</strong>
                             </span>
                             <!-- <span class="d-flex mb-2 text-secondary">
@@ -790,7 +790,12 @@
                             <span class="d-flex mb-2 text-secondary">
                               <i class="material-icons me-1">screen_rotation</i>
                               <strong class="me-1">Facing</strong>
-                              <strong class="text-info">{{ data.selectedPlayer?.gameInfo.rot.x.toFixed(2) }} {{ data.selectedPlayer?.gameInfo.rot.y.toFixed(2) }}</strong>
+                              <strong class="text-info">{{ data.selectedPlayer?.gameInfo.rot.y.toFixed(2) }} {{ data.selectedPlayer?.gameInfo.rot.x.toFixed(2) }}</strong>
+                            </span>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">emoji_nature</i>
+                              <strong class="me-1">Biome</strong>
+                              <strong class="text-info">{{ data.selectedPlayer?.gameInfo.biome }}</strong>
                             </span>
                             <span class="d-flex mb-2 text-secondary">
                               <i class="material-icons me-1">local_hospital</i>

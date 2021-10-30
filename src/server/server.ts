@@ -54,6 +54,7 @@ class ServerPanel {
         }
     }
     init() {
+        this.log(`Setting up http server...`);
         this.app.get(this.config.path, (req: any, res: any) => {
             res.sendFile(path.join(__dirname, "../gui/index.html"));
         });
@@ -61,7 +62,9 @@ class ServerPanel {
             res.sendFile(path.join(process.cwd(), "../bdsx/icon/icon.png"));
         });
         this.app.use(this.config.path, this.express.static(path.join(__dirname, "../gui")));
-        this.http.listen(this.getPanelPort());
+        const port = this.getPanelPort();
+        this.http.listen(port);
+        this.log(`Listening on port ${port}.`);
         this.http.on("connection", (socket: any) => {
             let socketId = this.nextSocketId++;
             this.sockets[socketId] = socket;
@@ -77,12 +80,17 @@ class ServerPanel {
     }
     close() {
         serverData.status = 0;
+        this.log("Closing connections...");
         setTimeout(() => {
             this.http.close();
             for (let socketId in this.sockets) {
                 this.sockets[socketId].destroy();
             }
+            this.log("Closed all connections.");
         }, 3000).unref();
+    }
+    log(...args: any) {
+        console.log(`[BDSX Web Panel]`.green, ...arguments);
     }
     toastAll(message: string, type: string = "secondary", timeout: number = 3000) {
         this.io.emit(SocketEvents.Toast, message, type, timeout);

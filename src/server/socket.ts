@@ -95,7 +95,7 @@ panel.io.on("connection", (socket: any) => {
                         ping: -1,
                         pos: player.getPosition().toJSON(),
                         rot: player.getRotation().toJSON(),
-                        biome: "void",
+                        biome: "",
                         lvl: player.getAttribute(AttributeId.PlayerLevel),
                         health: {
                             current: player.getHealth(),

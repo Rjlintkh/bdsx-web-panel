@@ -738,13 +738,18 @@ events.packetAfter(MinecraftPacketIds.PlayerAuthInput).on((pk, ni) => {
     for (const [uuid, _ni] of selectedPlayers) {
         if (_ni.equals(ni)) {
             const data = serverData.server.game.players[uuid];
-            const blockPos = BlockPos.create(pk.pos.x, pk.pos.y, pk.pos.z);
+            const player = ni.getActor()!;
+            const { x, y, z } = player.getPosition();
+            const blockPos = BlockPos.create(parseInt(x.toFixed(0)), parseInt(y.toFixed(0)), parseInt(z.toFixed(0)));
             data.gameInfo!.pos.x = pk.pos.x;
             data.gameInfo!.pos.y = pk.pos.y;
             data.gameInfo!.pos.z = pk.pos.z;
             data.gameInfo!.rot.x = pk.pitch;
             data.gameInfo!.rot.y = pk.yaw;
-            data.gameInfo!.biome = ni.getActor()!.getRegion().getChunkAt(blockPos).getBiome(ChunkBlockPos.create(blockPos)).name;
+            const chunk = player.getRegion().getChunkAt(blockPos);
+            if (chunk) {
+                data.gameInfo!.biome = chunk.getBiome(ChunkBlockPos.create(blockPos)).name;
+            }
             data.gameInfo!.ping = data.ip === "127.0.0.1" ?
                 serverInstance.networkHandler.instance.peer.GetLastPing(ni.address) - 30 :
                 serverInstance.networkHandler.instance.peer.GetLastPing(ni.address);

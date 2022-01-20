@@ -61,6 +61,18 @@ const app = new Vue({
                     objectives: {},
                     options: {},
                 }
+            },
+            extra: {
+                blacklist: {
+                    players: [],
+                    rules:  {
+                        "gamertag": [],
+                        "xuid": [],
+                        "uuid": [],
+                        "clientIds": [],
+                        "ip": []
+                    }
+                },
             }
         }
     },
@@ -178,6 +190,12 @@ const app = new Vue({
         },
         changeSetting: (category, name, value, type) => {
             socket.emit("ChangeSetting", category, name, value, type);
+        },
+        addBlacklistRule: (rule, content) => {
+            socket.emit("AddBlacklistRule", rule, content);
+        },
+        removeBlacklistRule: (rule, content) => {
+            socket.emit("RemoveBlacklistRule", rule, content);
         }
     }
 });

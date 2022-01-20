@@ -1,6 +1,6 @@
 {
   "name": "@bdsx/web-panel",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A web admin panel for BDSX",
   "main": "index.js",
   "keywords": [],
@@ -13,7 +13,7 @@
     "prepare": "tsc || exit 0"
   },
   "devDependencies": {
-    "@types/pidusage": "^2.0.1",
+    "@types/pidusage": "^2.0.2",
     "bdsx": "file:../bdsx"
   },
   "dependencies": {

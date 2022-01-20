@@ -348,6 +348,12 @@
                 </a>
               </li>
               <li class="nav-item">
+                <a class="nav-link " :class="(page === 'Blacklist')?'active':''" @click="page = 'Blacklist'">
+                  <i class="material-icons">back_hand</i>
+                  <span>Blacklist</span>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link " :class="(page === 'Configuration')?'active':''" @click="page = 'Configuration'">
                   <i class="material-icons">settings</i>
                   <span>Configuration</span>
@@ -810,9 +816,9 @@
                                 <span class="text-danger">
                                   <i class="material-icons">person_remove</i>
                                 </span> Kick </button>
-                              <!-- <button type="button" class="btn btn-white" @click="kickPlayer(data.selectedPlayer?.uuid)">
+                              <!-- <button type="button" class="btn btn-white" @click="banPlayer(data.selectedPlayer?.uuid)">
                                 <span class="text-danger">
-                                  <i class="material-icons">person_remove</i>
+                                  <i class="material-icons">person_off</i>
                                 </span> Ban </button> -->
                               <!-- <button type="button" class="btn btn-white" @click="kickPlayer(data.selectedPlayer?.uuid)">
                                 <span class="text-danger">
@@ -894,6 +900,114 @@
                             <input type="number" pattern="[0-9.]" class="form-control flex-grow-0" :id="`gamerule-${name}`" style="height: 20px; width: 46px; padding: 5px; text-align: right;" :value="option.value" @change="changeSetting(category, name, parseFloat(event.target.value), 3)">
                           </div>
                         </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="card-footer border-top">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="main-content-container container-fluid px-4" v-show="page === 'Blacklist'">
+            <!-- Page Header -->
+            <div class="page-header row no-gutters py-3">
+            </div>
+            <div class="row mb-4">
+              <div class="col-lg-6 col-md-12 col-sm-12 mb-4">
+                <!-- Player Record -->
+                <div class="card card-small">
+                  <div class="card-header border-bottom">
+                    <h6 class="m-0">Player Record - {{ data.extra.blacklist.players.length }}</h6>
+                  </div>
+                  <div class="card-body p-0">
+                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
+                      <li class="list-group-item d-flex px-3" style="cursor: pointer;" v-for="entry of data.extra.blacklist.players">
+                        <div>
+                          <strong class="text-truncate">
+                            {{ entry.gamertag }}{{ entry.altnames.filter(e => e !== entry.gamertag).length ? ` (AKA: ${entry.altnames.filter(e => e !== entry.gamertag).join(",")})` : ""}}
+                            &nbsp;
+                          </strong>
+                        </div>
+                        <br><br>
+                        <div>
+                          <div class="text-muted">
+                            <span class="d-flex mb-2 text-secondary" @click="addBlacklistRule('xuid', entry.xuid)">
+                              <i class="material-icons me-1">games</i>
+                              <strong class="me-1">XUID:</strong>
+                              <strong class="text-primary">{{ entry.xuid }}</strong>
+                            </span>
+                            <span class="d-flex mb-2 text-secondary" @click="addBlacklistRule('uuid', entry.uuid)">
+                              <i class="material-icons me-1">fingerprint</i>
+                              <strong class="me-1">UUID:</strong>
+                              <strong class="text-primary">{{ entry.uuid }}</strong>
+                            </span>
+                            <span class="d-flex mb-2 text-secondary" @click="addBlacklistRule('clientIds', entry.clientIds)">
+                              <i class="material-icons me-1">important_devices</i>
+                              <strong class="me-1">Client IDs:</strong>
+                              <strong class="text-primary">{{ entry.clientIds.join(",") }}</strong>
+                            </span>
+                            <span class="d-flex mb-2 text-secondary" @click="addBlacklistRule('ip', entry.ip)">
+                              <i class="material-icons me-1">settings_input_antenna</i>
+                              <strong class="me-1">IP History:</strong>
+                              <strong class="text-primary">{{ entry.ip.join(",") }}</strong>
+                            </span>
+                          </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="card-footer border-top">
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6 col-md-12 col-sm-12 mb-4">
+                <!-- Rules -->
+                <div class="card card-small">
+                  <div class="card-header border-bottom">
+                    <h6 class="m-0">Rules - Click on blue values next to a record to add one</h6>
+                  </div>
+                  <div class="card-body p-0">
+                    <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 730px;">
+                      <li class="list-group-item d-flex px-3" style="cursor: pointer;">
+                        <div>
+                          <div class="text-muted">
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">games</i>
+                              <strong class="me-1">XUIDs:</strong>
+                            </span>
+                            <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 200px;">
+                              <li class="list-group-item d-flex px-3" style="cursor: pointer;" v-for="e of data.extra.blacklist.rules.xuid">
+                                <strong class="text-primary" @click="removeBlacklistRule('xuid', e)">{{ e }}</strong>
+                              </li>
+                            </ul>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">fingerprint</i>
+                              <strong class="me-1">UUIDs:</strong>
+                            </span>
+                            <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 200px;">
+                              <li class="list-group-item d-flex px-3" style="cursor: pointer;" v-for="e of data.extra.blacklist.rules.uuid">
+                                <strong class="text-primary" @click="removeBlacklistRule('uuid', e)">{{ e }}</strong>
+                              </li>
+                            </ul>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">important_devices</i>
+                              <strong class="me-1">Client IDs:</strong>
+                            </span>
+                            <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 200px;">
+                              <li class="list-group-item d-flex px-3" style="cursor: pointer;" v-for="e of data.extra.blacklist.rules.clientIds">
+                                <strong class="text-primary" @click="removeBlacklistRule('clientIds', e)">{{ e }}</strong>
+                              </li>
+                            </ul>
+                            <span class="d-flex mb-2 text-secondary">
+                              <i class="material-icons me-1">settings_input_antenna</i>
+                              <strong class="me-1">IPs:</strong>
+                            </span>
+                            <ul class="list-group list-group-small list-group-flush overflow-auto h-100" style="max-height: 200px;">
+                              <li class="list-group-item d-flex px-3" style="cursor: pointer;" v-for="e of data.extra.blacklist.rules.ip">
+                                <strong class="text-primary" @click="removeBlacklistRule('ip', e)">{{ e }}</strong>
+                              </li>
+                            </ul>
+                          </div>
                       </li>
                     </ul>
                   </div>

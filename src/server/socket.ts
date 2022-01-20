@@ -8,6 +8,7 @@ import { loadedPlugins } from "bdsx/plugins";
 import { execSync } from "child_process";
 import { Utils } from "../utils";
 import { selectedPlayers, serverData } from "./data";
+import { addBlacklistRule, removeBlacklistRule } from "./externs/blacklist";
 import { panel, SocketEvents } from "./server";
 
 panel.io.on("connection", (socket: any) => {
@@ -147,6 +148,20 @@ panel.io.on("connection", (socket: any) => {
                     break;
                 }
 
+            });
+            socket.on(SocketEvents.AddBlacklistRule, (rule: string, content: string | string[]) => {
+                if (addBlacklistRule(rule as any, content)) {
+                    socket.emit(SocketEvents.Toast, `Successfully add blacklist rule "${rule}=${typeof content === "string" ? content : content.join("|")}".`, "success");
+                } else {
+                    socket.emit(SocketEvents.Toast, `Failed to add blacklist rule "${rule}=${typeof content === "string" ? content : content.join("|")}".`, "danger");
+                }
+            });
+            socket.on(SocketEvents.RemoveBlacklistRule, (rule: string, content: string | string[]) => {
+                if (removeBlacklistRule(rule as any, content)) {
+                    socket.emit(SocketEvents.Toast, `Successfully remove blacklist rule "${rule}=${typeof content === "string" ? content : content.join("|")}".`, "success");
+                } else {
+                    socket.emit(SocketEvents.Toast, `Failed to remove blacklist rule "${rule}=${typeof content === "string" ? content : content.join("|")}".`, "danger");
+                }
             });
         } else {
             socket.emit(SocketEvents.Toast, "Invalid username or password.", "danger");

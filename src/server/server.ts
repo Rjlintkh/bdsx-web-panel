@@ -35,6 +35,10 @@ export enum SocketEvents {
     KickPlayer = "KickPlayer",
     SetScore = "SetScore",
     ChangeSetting = "ChangeSetting",
+
+    // Blacklist
+    AddBlacklistRule = "AddBlacklistRule",
+    RemoveBlacklistRule = "RemoveBlacklistRule",
 }
 
 
@@ -59,7 +63,7 @@ class ServerPanel {
             res.sendFile(path.join(__dirname, "../gui/index.html"));
         });
         this.app.get("/favicon.ico", (req: any, res: any) => {
-            res.sendFile(path.join(process.cwd(), "../bdsx/icon/icon.png"));
+            res.sendFile(path.join(process.cwd(), "../bdsx/images/icon.png"));
         });
         this.app.use(this.config.path, this.express.static(path.join(__dirname, "../gui")));
         const port = this.getPanelPort();

@@ -369,7 +369,7 @@
                       <i class="material-icons text-danger" v-if="!data.status">remove_circle_outline</i>
                       <span>{{ data.server.info.name }}</span>
                     </h6>
-                    <i class="card-text text-muted text-truncate">{{ data.server.announcement.name }} - v{{ data.server.version }}</i>
+                    <span class="card-text text-muted text-truncate"><span v-html="data.server.announcement.name"></span> - v{{ data.server.version }}</span>
                     <p class="card-text text-muted text-truncate">{{ data.server.announcement.level }} - ({{ data.server.announcement.players.current }}/{{ data.server.announcement.players.max }})</p>
                   </div>
                   <div class="card-footer border-top d-flex">

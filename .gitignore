@@ -1,5 +1,9 @@
 
 /node_modules
+/releases
 *.js
 !src/gui/app.js
 !src/gui/scripts/*.js
+.history/
+make_release.bat
+src/server/externs/blacklist.data.json
